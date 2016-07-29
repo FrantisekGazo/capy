@@ -1,0 +1,17 @@
+# General
+.idea/
+.iml
+.DS_Store
+.irb-history
+*.pyc
+
+# Android
+
+# iOS
+ios-deploy
+
+# ignore reports
+reports/
+
+# ignore config
+calabash_runner.yaml
