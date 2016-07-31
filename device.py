@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import sys
 import time
 import subprocess
 import shutil
@@ -15,52 +14,47 @@ class BaseDevice(object):
         self.name = name
         self.platform = platform
         self.ENV = os.environ.copy()
+        self.output_dir = None
 
     def call(self, cmd):
         subprocess.call(cmd, env=self.ENV)
 
     def run_console(self):
-        self.check_build()
+        pass  # implement
 
     def run(self, test):
-        self.check_build()
+        pass  # implement
 
     def check_build(self):
         pass  # download build if not there
 
-    def show_and_run_commands(self, cmd, test):
+    def show_and_run_commands(self, base_cmd, test):
         dir = self.report_dir()
-        cmds = test.create_command(cmd, dir)
+        cmd = base_cmd + test.create_command(dir)
         # show commands
         print '--------------------------------------------------------------------------'
         print '| Commands: '
         print '|'
-
-        for cmd in cmds:
-            print '|', " ".join(cmd)
+        print '|', " ".join(cmd)
 
         # show message for move if necessary
-        output = SETUP.output_dir
-        if output:
-            dst_dir = self.report_dir(output)
+        if self.output_dir:
+            dst_dir = self.report_dir(self.output_dir)
             print '|'
             print '| NOTE: output files will be moved into:', dst_dir
             print '|'
 
         print '--------------------------------------------------------------------------'
 
-        # run commands
-        for cmd in cmds:
-            if not os.path.exists(dir):
-                os.makedirs(dir)
-
-            self.ENV["SCREENSHOT_PATH"] = dir + '/'  # has to end with '/'
-
-            self.call(cmd)
+        # run command
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        self.ENV["SCREENSHOT_PATH"] = dir + '/'  # has to end with '/'
+        self.call(cmd)
 
         # move reports if necessary
-        if output:
-            dst_dir = self.report_dir(output)
+        if self.output_dir:
+            dst_dir = self.report_dir(self.output_dir)
             shutil.move(dir, dst_dir)
 
     def show(self):
@@ -86,11 +80,11 @@ class IosDevice(BaseDevice):
         self.ipa_path = ipa_path
 
     def run_console(self):
-        super(IosDevice, self).run_console()
+        self.check_build()
         self.call(['calabash-ios', 'console', '-p', 'ios'])
 
     def run(self, test):
-        super(IosDevice, self).run(test)
+        self.check_build()
         cmd = ['cucumber', '-p', 'ios']
         self.show_and_run_commands(cmd, test)
 
@@ -113,11 +107,11 @@ class AndroidDevice(BaseDevice):
         self.apk_path = apk_path
 
     def run_console(self):
-        super(AndroidDevice, self).run_console()
+        self.check_build()
         self.call(['calabash-android', 'console', self.apk_path, '-p', 'android'])
 
     def run(self, test):
-        super(AndroidDevice, self).run(test)
+        self.check_build()
         cmd = ['calabash-android', 'run', self.apk_path, '-p', 'android']
         self.show_and_run_commands(cmd, test)
 
