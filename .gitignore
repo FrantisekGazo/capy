@@ -14,4 +14,4 @@ ios-deploy
 reports/
 
 # ignore config
-calabash_runner.yaml
+capy_conf.yaml

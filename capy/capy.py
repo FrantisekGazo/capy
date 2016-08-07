@@ -3,15 +3,15 @@
 import sys
 import argparse
 from datetime import datetime
-from setup import SETUP
+from conf import CONFIG
 
 
 def run(device_name, test_name):
     # save execution start
     start_time = datetime.now().replace(microsecond=0)
 
-    device = SETUP.get_device(device_name)
-    test = SETUP.get_test(test_name, report=True)
+    device = CONFIG.get_device(device_name)
+    test = CONFIG.get_test(test_name, report=True)
 
     device.run(test)
 
@@ -24,7 +24,7 @@ def run(device_name, test_name):
 
 
 def console(device_name):
-    device = SETUP.get_device(device_name)
+    device = CONFIG.get_device(device_name)
     device.show()
     device.run_console()
 
@@ -32,49 +32,13 @@ def console(device_name):
 def list():
     print "####################################################################################"
     print "# DEVICES:"
-    for device in SETUP.devices:
+    for device in CONFIG.devices:
         device.show()
     print "####################################################################################"
     print "# TESTS:"
-    for test in SETUP.tests:
+    for test in CONFIG.tests:
         test.show()
     print "####################################################################################"
-
-
-# if __name__ == '__main__':
-#     if len(sys.argv) == 1:
-#         print 'Specify what to do! (run / console / list)'
-#         sys.exit()
-#
-#     action = sys.argv[1]
-#
-#     if action == 'run':
-#         if len(sys.argv) != 4:
-#             print 'Usage is: run <device-name> <test-name>'
-#             sys.exit()
-#
-#         device = sys.argv[2]
-#         test = sys.argv[3]
-#         run(device, test)
-#
-#     elif action == 'console':
-#         if len(sys.argv) != 3:
-#             print 'Usage is: console <device-name>'
-#             sys.exit()
-#
-#         device = sys.argv[2]
-#         console(device)
-#
-#     elif action == 'list':
-#         if len(sys.argv) != 2:
-#             print 'Usage is: list'
-#             sys.exit()
-#
-#         list()
-#
-#     else:
-#         print 'Choose one of these actions: run / console / list'
-#         sys.exit()
 
 
 ################################
