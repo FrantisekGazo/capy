@@ -10,7 +10,7 @@ setup(
     author='František Gažo',
     author_email='frantisek.gazo@inloop.eu',
     name='capy',
-    version='0.1',
+    version='0.4.2',
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     url='https://github.com/FrantisekGazo/capy/',
@@ -27,7 +27,11 @@ setup(
     packages=[
         'capy'
     ],
-    install_required=[
+    install_requires=[ # list of this package dependencies
         'PyYAML>=3.11'
-    ]
+    ],
+    entry_points='''
+        [console_scripts]
+        capy=capy.capy:main
+    '''
 )

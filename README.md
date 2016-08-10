@@ -1,23 +1,19 @@
-# Usage
+# capy
 
-1) Make sure calabash is ready on your system
+## Test in virtual environment
 
-2) Add this project as git submodule to your project
+`virtualenv venv`
 
-3) Install support for yaml `pip install pyyaml`
+`source venv/bin/activate`
 
-4) Create `calabash_runner.yaml` file with desired configuration
+`pip install capy`
 
 
-# calabash_runner.yaml
+## Publish to PYPI
 
-```
+1) Register on `https://pypi.python.org/`)
 
-devices:
-    android:
-        - generic
-    ios:
-        - ipadtesting:
+2) Register new project: `python setup.py register`
 
-```
+3) Upload new build: `python setup.py sdist upload`
 

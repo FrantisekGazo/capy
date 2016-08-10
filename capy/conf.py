@@ -21,6 +21,10 @@ class Config:
         self.tests = self.load_tests()
 
     def load_setup(self, file_name):
+        if not os.path.exists(file_name):
+            print "Current directory does not contain configuration file '%s'. Please create one and run again." % file_name
+            sys.exit(1)
+
         with open(file_name, 'r') as stream:
             try:
                 return yaml.load(stream)
@@ -88,9 +92,3 @@ class Config:
 
         print "Test '%s' was not found" % name
         sys.exit(1)
-
-
-################################
-# Shared instance
-################################
-CONFIG = Config('capy_conf.yaml')
