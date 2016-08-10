@@ -8,7 +8,7 @@ from conf import Config
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.5.0'
+VERSION = '0.5.4'
 
 
 def get_config():
@@ -75,6 +75,13 @@ def install(device_name):
     device.install()
 
 
+def uninstall(device_name):
+    config = get_config()
+    device = config.get_device(device_name)
+    print 'Uninstalling from device %s...' % device.name
+    device.uninstall()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-r', '--run', nargs=2, metavar=('DEVICE', 'TEST'),
@@ -91,6 +98,8 @@ def main():
                         help="Download build for given platform")
     parser.add_argument('-i', '--install', nargs=1, metavar='DEVICE',
                         help="Install current build on DEVICE")
+    parser.add_argument('-u', '--uninstall', nargs=1, metavar='DEVICE',
+                        help="Uninstall build from DEVICE")
     args = parser.parse_args()
 
     if args.run:
@@ -107,6 +116,8 @@ def main():
         download(platform_name=args.download)
     elif args.install:
         install(device_name=args.install[0])
+    elif args.uninstall:
+        uninstall(device_name=args.uninstall[0])
     else:  # show help by default
         parser.parse_args(['--help'])
 

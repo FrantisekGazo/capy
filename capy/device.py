@@ -49,6 +49,9 @@ class BaseDevice(object):
     def install(self):
         pass  # implement
 
+    def uninstall(self):
+        pass  # implement
+
     # download build if not there
     def check_build(self):
         if self.platform.build_download_cmd and not os.path.exists(self.platform.build_path):
@@ -76,7 +79,7 @@ class BaseDevice(object):
         if not os.path.exists(dir):
             os.makedirs(dir)
         self.ENV["SCREENSHOT_PATH"] = dir + '/'  # has to end with '/'
-        # self.call(cmd)
+        self.call(cmd)
 
         # move reports if necessary
         if self.platform.output_dir:
@@ -115,10 +118,14 @@ class IosDevice(BaseDevice):
         print '\t- IP: %s' % self.ENV["DEVICE_ENDPOINT"]
 
     def install(self):
-        self.call(['curl', '-O', 'https://raw.githubusercontent.com/FrantisekGazo/capy/master/scripts/transporter_chief.rb'])
+        self.call(['curl', '-O',
+                   'https://raw.githubusercontent.com/FrantisekGazo/capy/master/scripts/transporter_chief.rb'])
         self.call(['ruby', 'transporter_chief.rb', self.platform.build_path])
         self.call(['rm', 'transporter_chief.rb'])
         self.call(['rm', 'ios-deploy'])
+
+    def uninstall(self):
+        print 'Not supported for now'
 
 
 ################################
@@ -136,3 +143,6 @@ class AndroidDevice(BaseDevice):
 
     def install(self):
         self.call(['adb', 'install', self.platform.build_path])
+
+    def uninstall(self):
+        self.call(['adb', 'uninstall', self.platform.app_id])
