@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import subprocess
 from datetime import datetime
 from conf import Config
 
@@ -14,14 +15,14 @@ def get_config():
     return Config('capy_conf.yaml')
 
 
-def run(device_name, test_name):
+def run(device_name, test_name, with_report=False):
     config = get_config()
 
     # save execution start
     start_time = datetime.now().replace(microsecond=0)
 
     device = config.get_device(device_name)
-    test = config.get_test(test_name, report=True)
+    test = config.get_test(test_name, report=with_report)
 
     device.run(test)
 
@@ -60,25 +61,53 @@ def version():
     print DESCRIPTION
 
 
+def download(platform_name):
+    config = get_config()
+    cmd = config.platform_setup[platform_name].build_download_cmd
+    print 'Download cmd is: %s' % cmd
+    subprocess.call(cmd.split(' '))
+
+
+def install(device_name):
+    config = get_config()
+    device = config.get_device(device_name)
+    print 'Installing to device %s...' % device.name
+    device.install()
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--run', nargs=2, metavar=('DEVICE', 'TEST'))
-    parser.add_argument('-c', '--console', nargs=1, metavar='DEVICE')
-    parser.add_argument('-l', '--list', action='store_true')
-    parser.add_argument('-v', '--version', action='store_true')
-    parser.add_argument('-d', '--download', choices=['android', 'ios'])
-    parser.add_argument('-i', '--install', nargs=1, metavar='DEVICE')
+    parser.add_argument('-r', '--run', nargs=2, metavar=('DEVICE', 'TEST'),
+                        help="Run TEST on DEVICE")
+    parser.add_argument('-rr', '--run-report', nargs=2, metavar=('DEVICE', 'TEST'),
+                        help="Run TEST on DEVICE and create HTML report")
+    parser.add_argument('-c', '--console', nargs=1, metavar='DEVICE',
+                        help="Open calabash console for DEVICE")
+    parser.add_argument('-l', '--list', action='store_true',
+                        help="List all supported devices and tests")
+    parser.add_argument('-v', '--version', action='store_true',
+                        help="Show version")
+    parser.add_argument('-d', '--download', choices=['android', 'ios'],
+                        help="Download build for given platform")
+    parser.add_argument('-i', '--install', nargs=1, metavar='DEVICE',
+                        help="Install current build on DEVICE")
     args = parser.parse_args()
 
     if args.run:
-        run(args.run[0], args.run[1])
+        run(device_name=args.run[0], test_name=args.run[1])
+    elif args.run_report:
+        run(device_name=args.run_report[0], test_name=args.run_report[1], with_report=True)
     elif args.console:
-        console(args.console[0])
+        console(device_name=args.console[0])
     elif args.list:
         list()
     elif args.version:
         version()
-    else: # show help by default
+    elif args.download:
+        download(platform_name=args.download)
+    elif args.install:
+        install(device_name=args.install[0])
+    else:  # show help by default
         parser.parse_args(['--help'])
 
 

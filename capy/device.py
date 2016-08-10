@@ -7,16 +7,25 @@ import shutil
 
 
 ################################
+# Device Platform Setup
+################################
+class PlatformSetup(object):
+    def __init__(self, name, app_id, build_path, build_download_cmd, output_dir):
+        self.name = name
+        self.app_id = app_id
+        self.output_dir = output_dir
+        self.build_path = build_path
+        self.build_download_cmd = build_download_cmd
+
+
+################################
 # Base Device
 ################################
 class BaseDevice(object):
-    def __init__(self, name, platform, build_path, download_cmd):
-        self.name = name
+    def __init__(self, platform, name):
         self.platform = platform
+        self.name = name
         self.ENV = os.environ.copy()
-        self.output_dir = None
-        self.build_path = build_path
-        self.build_download_cmd = download_cmd
 
     def call(self, cmd):
         subprocess.call(cmd, env=self.ENV)
@@ -37,10 +46,13 @@ class BaseDevice(object):
     def get_run_cmd(self):
         return []  # implement
 
+    def install(self):
+        pass  # implement
+
     # download build if not there
     def check_build(self):
-        if self.build_download_cmd and not os.path.exists(self.build_path):
-            self.call(self.build_download_cmd.split(" "))
+        if self.platform.build_download_cmd and not os.path.exists(self.platform.build_path):
+            self.call(self.platform.build_download_cmd.split(' '))
 
     def show_and_run_commands(self, base_cmd, test):
         dir = self.report_dir()
@@ -52,8 +64,8 @@ class BaseDevice(object):
         print '|', " ".join(cmd)
 
         # show message for move if necessary
-        if self.output_dir:
-            dst_dir = self.report_dir(self.output_dir)
+        if self.platform.output_dir:
+            dst_dir = self.report_dir(self.platform.output_dir)
             print '|'
             print '| NOTE: output files will be moved into:', dst_dir
             print '|'
@@ -64,19 +76,18 @@ class BaseDevice(object):
         if not os.path.exists(dir):
             os.makedirs(dir)
         self.ENV["SCREENSHOT_PATH"] = dir + '/'  # has to end with '/'
-        self.call(cmd)
+        # self.call(cmd)
 
         # move reports if necessary
-        if self.output_dir:
-            dst_dir = self.report_dir(self.output_dir)
+        if self.platform.output_dir:
+            dst_dir = self.report_dir(self.platform.output_dir)
             shutil.move(dir, dst_dir)
 
     def show(self):
-        print " ", self.name
-        print "\t- Platform:", self.platform
+        print ' %s (%s)' % (self.name, self.platform.name)
 
     def report_dir(self, parent=None):
-        dir = 'reports/%s-%s/%s/' % (self.platform, self.name, time.strftime('%Y_%m_%d-%H_%M_%S'))
+        dir = 'reports/%s-%s/%s/' % (self.platform.name, self.name, time.strftime('%Y_%m_%d-%H_%M_%S'))
         if parent:
             dir = os.path.join(parent, dir)
         return os.path.abspath(dir)
@@ -86,9 +97,9 @@ class BaseDevice(object):
 # iOS Device
 ################################
 class IosDevice(BaseDevice):
-    def __init__(self, name, uuid, ip, bundle_id, build_path, download_cmd):
-        super(IosDevice, self).__init__(name, 'iOS', build_path, download_cmd)
-        self.ENV["BUNDLE_ID"] = bundle_id
+    def __init__(self, platform, name, uuid, ip):
+        super(IosDevice, self).__init__(platform, name)
+        self.ENV["BUNDLE_ID"] = platform.app_id
         self.ENV["DEVICE_TARGET"] = uuid
         self.ENV["DEVICE_ENDPOINT"] = 'http://%s:37265' % ip
 
@@ -100,19 +111,28 @@ class IosDevice(BaseDevice):
 
     def show(self):
         super(IosDevice, self).show()
-        print "\t- UUID:", self.ENV["DEVICE_TARGET"]
-        print "\t- IP:", self.ENV["DEVICE_ENDPOINT"]
+        print '\t- UUID: %s' % self.ENV["DEVICE_TARGET"]
+        print '\t- IP: %s' % self.ENV["DEVICE_ENDPOINT"]
+
+    def install(self):
+        self.call(['curl', '-O', 'https://raw.githubusercontent.com/FrantisekGazo/capy/master/scripts/transporter_chief.rb'])
+        self.call(['ruby', 'transporter_chief.rb', self.platform.build_path])
+        self.call(['rm', 'transporter_chief.rb'])
+        self.call(['rm', 'ios-deploy'])
 
 
 ################################
 # Android Device
 ################################
 class AndroidDevice(BaseDevice):
-    def __init__(self, name, build_path, download_cmd):
-        super(AndroidDevice, self).__init__(name, 'Android', build_path, download_cmd)
+    def __init__(self, platform, name):
+        super(AndroidDevice, self).__init__(platform, name)
 
     def get_console_cmd(self):
-        return ['calabash-android', 'console', self.build_path, '-p', 'android']
+        return ['calabash-android', 'console', self.platform.build_path, '-p', 'android']
 
     def get_run_cmd(self):
-        return ['calabash-android', 'run', self.build_path, '-p', 'android']
+        return ['calabash-android', 'run', self.platform.build_path, '-p', 'android']
+
+    def install(self):
+        self.call(['adb', 'install', self.platform.build_path])

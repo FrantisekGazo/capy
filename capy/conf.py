@@ -3,7 +3,7 @@
 import os
 import sys
 import yaml
-from device import AndroidDevice, IosDevice
+from device import PlatformSetup, AndroidDevice, IosDevice
 from test import Test, TestWithReport
 
 
@@ -13,11 +13,15 @@ from test import Test, TestWithReport
 class Config:
     def __init__(self, file_name):
         self.data = self.load_setup(file_name)
-
+        # config
         self.config = self.load_config()
-
+        # devices
+        self.platform_setup = {
+            'android': self.load_platform_setup('Android'),
+            'ios': self.load_platform_setup('iOS')
+        }
         self.devices = self.load_devices()
-
+        # tests
         self.tests = self.load_tests()
 
     def load_setup(self, file_name):
@@ -34,32 +38,32 @@ class Config:
     def load_config(self):
         return self.data['config']
 
+    def load_platform_setup(self, platform_name):
+        output_dir = self.get_path(self.config['output'], default='.')
+        platform_config = self.config[platform_name.lower()]
+        return PlatformSetup(
+                name=platform_name,
+                app_id=platform_config['app_id'],
+                build_path=self.get_path(platform_config['build']),
+                build_download_cmd=platform_config.get('download', ''),
+                output_dir=output_dir
+        )
+
     def load_devices(self):
         all = []
-
-        out_dir = self.get_path(self.config['output'], default='.')
-        # android
-        apk_path = self.get_path(self.config['android']['apk'])
-        android_download_cmd = self.config['android'].get('download', None)
-        # ios
-        bundle_id = self.config['ios']['bundle']
-        ipa_path = self.get_path(self.config['ios']['ipa'])
-        ios_download_cmd = self.config['android'].get('download', None)
 
         devices = self.data['devices']
         for key, value in devices.iteritems():
             if key == 'android':
                 for device_name, _ in value.iteritems():
-                    d = AndroidDevice(device_name, apk_path, android_download_cmd)
-                    d.output_dir = out_dir
+                    d = AndroidDevice(self.platform_setup['android'], device_name)
                     all.append(d)
             elif key == 'ios':
                 for device_name, device_param in value.iteritems():
                     self.validate_device(device_name, device_param, 'uuid')
                     self.validate_device(device_name, device_param, 'ip')
 
-                    d = IosDevice(device_name, device_param['uuid'], device_param['ip'], bundle_id, ipa_path, ios_download_cmd)
-                    d.output_dir = out_dir
+                    d = IosDevice(self.platform_setup['ios'], device_name, device_param['uuid'], device_param['ip'])
                     all.append(d)
 
         return all
