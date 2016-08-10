@@ -2,17 +2,15 @@
 # coding=utf-8
 
 from setuptools import setup
-
-DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
-LONG_DESCRIPTION = DESCRIPTION
+from capy import capy
 
 setup(
     author='František Gažo',
     author_email='frantisek.gazo@inloop.eu',
-    name='capy',
-    version='0.4.2',
-    description=DESCRIPTION,
-    long_description=LONG_DESCRIPTION,
+    name=capy.NAME,
+    version=capy.VERSION,
+    description=capy.DESCRIPTION,
+    long_description=capy.LONG_DESCRIPTION,
     url='https://github.com/FrantisekGazo/capy/',
     platforms=['MacOS'],
     license='MIT License',

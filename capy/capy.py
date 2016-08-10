@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
-import sys
 import argparse
 from datetime import datetime
 from conf import Config
+
+DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
+LONG_DESCRIPTION = DESCRIPTION
+NAME = 'capy'
+VERSION = '0.4.3'
 
 
 def get_config():
@@ -51,11 +55,17 @@ def list():
     print "####################################################################################"
 
 
+def version():
+    print '%s %s' % (NAME, VERSION)
+    print DESCRIPTION
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-r', '--run', nargs=2, metavar=('DEVICE', 'TEST'))
     parser.add_argument('-c', '--console', nargs=1, metavar='DEVICE')
     parser.add_argument('-l', '--list', action='store_true')
+    parser.add_argument('-v', '--version', action='store_true')
     parser.add_argument('-d', '--download', choices=['android', 'ios'])
     parser.add_argument('-i', '--install', nargs=1, metavar='DEVICE')
     args = parser.parse_args()
@@ -66,7 +76,9 @@ def main():
         console(args.console[0])
     elif args.list:
         list()
-    else:
+    elif args.version:
+        version()
+    else: # show help by default
         parser.parse_args(['--help'])
 
 
