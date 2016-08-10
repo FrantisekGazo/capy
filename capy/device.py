@@ -10,23 +10,37 @@ import shutil
 # Base Device
 ################################
 class BaseDevice(object):
-    def __init__(self, name, platform):
+    def __init__(self, name, platform, build_path, download_cmd):
         self.name = name
         self.platform = platform
         self.ENV = os.environ.copy()
         self.output_dir = None
+        self.build_path = build_path
+        self.build_download_cmd = download_cmd
 
     def call(self, cmd):
         subprocess.call(cmd, env=self.ENV)
 
     def run_console(self):
-        pass  # implement
+        self.check_build()
+        cmd = self.get_console_cmd()
+        self.call(cmd)
+
+    def get_console_cmd(self):
+        return []  # implement
 
     def run(self, test):
-        pass  # implement
+        self.check_build()
+        cmd = self.get_run_cmd()
+        self.show_and_run_commands(cmd, test)
 
+    def get_run_cmd(self):
+        return []  # implement
+
+    # download build if not there
     def check_build(self):
-        pass  # download build if not there
+        if self.build_download_cmd and not os.path.exists(self.build_path):
+            self.call(self.build_download_cmd.split(" "))
 
     def show_and_run_commands(self, base_cmd, test):
         dir = self.report_dir()
@@ -72,49 +86,33 @@ class BaseDevice(object):
 # iOS Device
 ################################
 class IosDevice(BaseDevice):
-    def __init__(self, name, uuid, ip, bundle_id, ipa_path):
-        super(IosDevice, self).__init__(name, 'iOS')
+    def __init__(self, name, uuid, ip, bundle_id, build_path, download_cmd):
+        super(IosDevice, self).__init__(name, 'iOS', build_path, download_cmd)
         self.ENV["BUNDLE_ID"] = bundle_id
         self.ENV["DEVICE_TARGET"] = uuid
         self.ENV["DEVICE_ENDPOINT"] = 'http://%s:37265' % ip
-        self.ipa_path = ipa_path
 
-    def run_console(self):
-        self.check_build()
-        self.call(['calabash-ios', 'console', '-p', 'ios'])
+    def get_console_cmd(self):
+        return ['calabash-ios', 'console', '-p', 'ios']
 
-    def run(self, test):
-        self.check_build()
-        cmd = ['cucumber', '-p', 'ios']
-        self.show_and_run_commands(cmd, test)
+    def get_run_cmd(self):
+        return ['cucumber', '-p', 'ios']
 
     def show(self):
         super(IosDevice, self).show()
         print "\t- UUID:", self.ENV["DEVICE_TARGET"]
         print "\t- IP:", self.ENV["DEVICE_ENDPOINT"]
 
-    def check_build(self):
-        if not os.path.exists(self.ipa_path):
-            self.call(['bash', 'download_ios.sh'])
-
 
 ################################
 # Android Device
 ################################
 class AndroidDevice(BaseDevice):
-    def __init__(self, name, apk_path):
-        super(AndroidDevice, self).__init__(name, 'Android')
-        self.apk_path = apk_path
+    def __init__(self, name, build_path, download_cmd):
+        super(AndroidDevice, self).__init__(name, 'Android', build_path, download_cmd)
 
-    def run_console(self):
-        self.check_build()
-        self.call(['calabash-android', 'console', self.apk_path, '-p', 'android'])
+    def get_console_cmd(self):
+        return ['calabash-android', 'console', self.build_path, '-p', 'android']
 
-    def run(self, test):
-        self.check_build()
-        cmd = ['calabash-android', 'run', self.apk_path, '-p', 'android']
-        self.show_and_run_commands(cmd, test)
-
-    def check_build(self):
-        if not os.path.exists(self.apk_path):
-            self.call(['bash', 'download_android.sh'])
+    def get_run_cmd(self):
+        return ['calabash-android', 'run', self.build_path, '-p', 'android']

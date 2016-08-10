@@ -37,16 +37,20 @@ class Config:
     def load_devices(self):
         all = []
 
-        apk_path = self.get_path(self.config['android']['apk'])
-        ipa_path = self.get_path(self.config['ios']['ipa'])
-        bundle_id = self.config['ios']['bundle']
         out_dir = self.get_path(self.config['output'], default='.')
+        # android
+        apk_path = self.get_path(self.config['android']['apk'])
+        android_download_cmd = self.config['android'].get('download', None)
+        # ios
+        bundle_id = self.config['ios']['bundle']
+        ipa_path = self.get_path(self.config['ios']['ipa'])
+        ios_download_cmd = self.config['android'].get('download', None)
 
         devices = self.data['devices']
         for key, value in devices.iteritems():
             if key == 'android':
                 for device_name, _ in value.iteritems():
-                    d = AndroidDevice(device_name, apk_path)
+                    d = AndroidDevice(device_name, apk_path, android_download_cmd)
                     d.output_dir = out_dir
                     all.append(d)
             elif key == 'ios':
@@ -54,7 +58,7 @@ class Config:
                     self.validate_device(device_name, device_param, 'uuid')
                     self.validate_device(device_name, device_param, 'ip')
 
-                    d = IosDevice(device_name, device_param['uuid'], device_param['ip'], bundle_id, ipa_path)
+                    d = IosDevice(device_name, device_param['uuid'], device_param['ip'], bundle_id, ipa_path, ios_download_cmd)
                     d.output_dir = out_dir
                     all.append(d)
 
