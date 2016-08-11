@@ -46,6 +46,10 @@ class BaseDevice(object):
     def get_run_cmd(self):
         return []  # implement
 
+    def check_and_install(self):
+        self.check_build()
+        self.install()
+
     def install(self):
         pass  # implement
 
@@ -55,6 +59,7 @@ class BaseDevice(object):
     # download build if not there
     def check_build(self):
         if self.platform.build_download_cmd and not os.path.exists(self.platform.build_path):
+            print 'No build for %s was found. Downloading latest...' % self.name
             self.call(self.platform.build_download_cmd.split(' '))
 
     def show_and_run_commands(self, base_cmd, test):

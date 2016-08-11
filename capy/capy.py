@@ -8,7 +8,7 @@ from conf import Config
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.5.5'
+VERSION = '0.5.6'
 
 
 def get_config():
@@ -72,7 +72,7 @@ def install(device_name):
     config = get_config()
     device = config.get_device(device_name)
     print 'Installing to device %s...' % device.name
-    device.install()
+    device.check_and_install()
 
 
 def uninstall(device_name):
