@@ -8,11 +8,11 @@ from conf import Config
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.5.7'
+VERSION = '0.5.8'
 
 
 def get_config():
-    return Config('capy_conf.yaml')
+    return Config(file_name='capy_conf.yaml', private_file_name='capy_private.yaml')
 
 
 def run(device_name, test_name, with_report=False):

@@ -15,6 +15,7 @@ reports/
 
 # ignore config
 capy_conf.yaml
+capy_private.yaml
 
 # distribution
 dist

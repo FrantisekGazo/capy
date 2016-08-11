@@ -7,12 +7,22 @@ from device import PlatformSetup, AndroidDevice, IosDevice
 from test import Test, TestWithReport
 
 
+def merge(user, default):
+    if isinstance(user, dict) and isinstance(default, dict):
+        for k, v in default.iteritems():
+            if k not in user:
+                user[k] = v
+            else:
+                user[k] = merge(user[k], v)
+    return user
+
+
 ################################
 # Setup
 ################################
 class Config:
-    def __init__(self, file_name):
-        self.data = self.load_setup(file_name)
+    def __init__(self, file_name, private_file_name):
+        self.data = self.load_setup(file_name, private_file_name)
         # config
         self.config = self.load_config()
         # devices
@@ -24,16 +34,29 @@ class Config:
         # tests
         self.tests = self.load_tests()
 
-    def load_setup(self, file_name):
+    def load_yaml(self, file_name, check):
         if not os.path.exists(file_name):
-            print "Current directory does not contain configuration file '%s'. Please create one and run again." % file_name
-            sys.exit(1)
+            if check:
+                print "Current directory does not contain configuration file '%s'. Please create one and run again." % file_name
+                sys.exit(1)
+            else:
+                return None
 
         with open(file_name, 'r') as stream:
             try:
                 return yaml.load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
+
+    def load_setup(self, file_name, private_file_name):
+        data = self.load_yaml(file_name, check=True)
+        private_data = self.load_yaml(private_file_name, check=False)
+
+        if private_data:
+            private_data = merge(private_data, data)
+            return private_data
+        else:
+            return data
 
     def load_config(self):
         return self.data['config']
