@@ -1,6 +1,6 @@
 # General
 .idea/
-.iml
+*.iml
 .DS_Store
 .irb-history
 *.pyc
@@ -15,3 +15,7 @@ reports/
 
 # ignore config
 capy_conf.yaml
+
+# distribution
+dist
+capy.egg-info
