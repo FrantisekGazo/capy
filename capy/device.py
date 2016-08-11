@@ -142,7 +142,8 @@ class AndroidDevice(BaseDevice):
         return ['calabash-android', 'run', self.platform.build_path, '-p', 'android']
 
     def install(self):
-        self.call(['adb', 'install', self.platform.build_path])
+        self.call(['calabash-android', 'build', self.platform.build_path]) # rebuild test-server
+        self.call(['adb', 'install', '-r', self.platform.build_path]) # install app
 
     def uninstall(self):
         self.call(['adb', 'uninstall', self.platform.app_id])
