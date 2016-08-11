@@ -63,21 +63,16 @@ class BaseDevice(object):
             self.call(self.platform.build_download_cmd.split(' '))
 
     def show_and_run_commands(self, base_cmd, test):
-        dir = self.report_dir()
+        dir = self.report_dir(self.platform.output_dir)
         cmd = base_cmd + test.create_command(dir)
         # show commands
         print '--------------------------------------------------------------------------'
         print '| Commands: '
         print '|'
         print '|', " ".join(cmd)
-
-        # show message for move if necessary
-        if self.platform.output_dir:
-            dst_dir = self.report_dir(self.platform.output_dir)
-            print '|'
-            print '| NOTE: output files will be moved into:', dst_dir
-            print '|'
-
+        print '|'
+        print '| NOTE: output files will be in:', dir
+        print '|'
         print '--------------------------------------------------------------------------'
 
         # run command
@@ -85,11 +80,6 @@ class BaseDevice(object):
             os.makedirs(dir)
         self.ENV["SCREENSHOT_PATH"] = dir + '/'  # has to end with '/'
         self.call(cmd)
-
-        # move reports if necessary
-        if self.platform.output_dir:
-            dst_dir = self.report_dir(self.platform.output_dir)
-            shutil.move(dir, dst_dir)
 
     def show(self):
         print ' %s (%s)' % (self.name, self.platform.name)
