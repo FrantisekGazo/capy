@@ -4,11 +4,12 @@ import argparse
 import subprocess
 from datetime import datetime
 from conf import Config
+from util import Color
 
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.5.12'
+VERSION = '0.5.13'
 
 
 def get_config():
@@ -38,22 +39,26 @@ def console(device_name):
     config = get_config()
 
     device = config.get_device(device_name)
-    device.show()
+    print device.show()
     device.run_console()
 
 
 def list():
     config = get_config()
 
-    print "####################################################################################"
-    print "# DEVICES:"
+    line_start = Color.GREEN + '|'
+
+    print line_start + "------------------------------------------------------------------------------------"
+    print line_start + " DEVICES:"
+    print line_start
     for device in config.devices:
-        device.show()
-    print "####################################################################################"
-    print "# TESTS:"
+        print line_start + device.show()
+    print line_start + "------------------------------------------------------------------------------------"
+    print line_start + " TESTS:"
+    print line_start
     for test in config.tests:
-        test.show()
-    print "####################################################################################"
+        print line_start + test.show()
+    print line_start + "------------------------------------------------------------------------------------"
 
 
 def version():

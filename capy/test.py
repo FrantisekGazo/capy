@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from util import Color
 
 
 ################################################################
@@ -18,7 +19,7 @@ class Test:
         self.cmd = cmd
 
     def show(self):
-        print " ", self.name, ":", self.cmd
+        return Color.LIGHT_YELLOW + " " + self.name + ": " + Color.LIGHT_BLUE + self.cmd + Color.ENDC
 
     def create_command(self, output_dir_path):
         return self.cmd.split(' ')

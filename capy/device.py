@@ -4,6 +4,7 @@ import os
 import time
 import subprocess
 import shutil
+from util import Color
 
 
 ################################
@@ -87,7 +88,7 @@ class BaseDevice(object):
         shutil.rmtree(tmp)
 
     def show(self):
-        print ' %s (%s)' % (self.name, self.platform.name)
+        return Color.LIGHT_YELLOW + ' %s ' % self.name + Color.YELLOW + '(%s)' % self.platform.name + Color.ENDC
 
     def reports_dir(self, parent=None):
         dir = 'reports/%s-%s/' % (self.platform.name, self.name)
@@ -121,9 +122,10 @@ class IosDevice(BaseDevice):
         return ['cucumber', '-p', 'ios']
 
     def show(self):
-        super(IosDevice, self).show()
-        print '\t- UUID: %s' % self.ENV["DEVICE_TARGET"]
-        print '\t- IP: %s' % self.ENV["DEVICE_ENDPOINT"]
+        s = super(IosDevice, self).show()
+        s +=  '\n\t- ' + Color.RED + 'UUID: ' + Color.LIGHT_BLUE + '%s' % self.ENV["DEVICE_TARGET"] + Color.ENDC
+        s += '\n\t- ' + Color.RED + 'IP: ' + Color.LIGHT_BLUE + '%s' % self.ENV["DEVICE_ENDPOINT"] + Color.ENDC
+        return s
 
     def install(self):
         self.call(['curl', '-O',
