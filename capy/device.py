@@ -63,32 +63,45 @@ class BaseDevice(object):
             self.call(self.platform.build_download_cmd.split(' '))
 
     def show_and_run_commands(self, base_cmd, test):
-        dir = self.report_dir(self.platform.output_dir)
-        cmd = base_cmd + test.create_command(dir)
+        tmp = '.capy_temp/'
+        tmp_out = self.current_report_dir(tmp)
+        dir_out = self.reports_dir(self.platform.output_dir)
+
+        cmd = base_cmd + test.create_command(tmp_out)
         # show commands
         print '--------------------------------------------------------------------------'
         print '| Commands: '
         print '|'
         print '|', " ".join(cmd)
         print '|'
-        print '| NOTE: output files will be in:', dir
+        print '| NOTE: output files will be moved to:', dir_out
         print '|'
         print '--------------------------------------------------------------------------'
 
         # run command
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-        self.ENV["SCREENSHOT_PATH"] = dir + '/'  # has to end with '/'
+        self.ENV["SCREENSHOT_PATH"] = tmp_out + '/'  # has to end with '/'
         self.call(cmd)
+
+        # move files
+        shutil.move(tmp_out, dir_out)
+        shutil.rmtree(tmp)
 
     def show(self):
         print ' %s (%s)' % (self.name, self.platform.name)
 
-    def report_dir(self, parent=None):
-        dir = 'reports/%s-%s/%s/' % (self.platform.name, self.name, time.strftime('%Y_%m_%d-%H_%M_%S'))
+    def reports_dir(self, parent=None):
+        dir = 'reports/%s-%s/' % (self.platform.name, self.name)
         if parent:
             dir = os.path.join(parent, dir)
+            if not os.path.exists(dir):
+                os.makedirs(dir)
         return os.path.abspath(dir)
+
+    def current_report_dir(self, parent=None):
+        dir = os.path.join(self.reports_dir(parent), time.strftime('%Y_%m_%d-%H_%M_%S'))
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        return dir
 
 
 ################################

@@ -8,7 +8,7 @@ from conf import Config
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.5.8'
+VERSION = '0.5.12'
 
 
 def get_config():

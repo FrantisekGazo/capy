@@ -1,12 +1,10 @@
 # capy
 
-## Test in virtual environment
+## Usage
 
-`virtualenv venv`
+`brew install python`
 
-`source venv/bin/activate`
-
-`pip install capy`
+`pip install capy` (optionally you need to run `pip install pyyaml` if it fails)
 
 
 ## Publish to PYPI
