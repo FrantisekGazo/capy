@@ -1,7 +1,41 @@
 #!/usr/bin/env python
 
-import os
-from util import Color
+from os import path
+from util import Color, merge, TMP_DIR
+
+
+################################
+# Test Manager
+################################
+class TestManager(object):
+    def __init__(self, conf):
+        if not conf:
+            print Color.LIGHT_RED + 'TESTS configuration is missing' + Color.ENDC
+            sys.exit(1)
+
+        self.output_dir = conf.get('output_dir', path.join(TMP_DIR))
+        conf['output_dir'] = self.output_dir
+        self.tests = self.load_tests(conf)
+
+    def load_tests(self, conf):
+        tests = {}
+
+        for name, info in conf.iteritems():
+            if name == 'output_dir':
+                continue
+
+            info = merge(info, conf)
+            tests[name] = Test(name, info)
+
+        return tests
+
+    def get_test(self, name, report=False):
+        test = self.tests.get(name, None)
+        if test:
+            return TestWithReport(test) if report else test
+        else:
+            print Color.LIGHT_RED + "Test '%s' was not found" % name + Color.ENDC
+            sys.exit(1)
 
 
 ################################################################
@@ -14,13 +48,14 @@ from util import Color
 # a executes those scenarios that match the tags)
 ################################################################
 class Test:
-    def __init__(self, name, cmd):
+    def __init__(self, name, conf):
         self.name = name
-        self.cmd = cmd
+        self.output_dir = conf['output_dir']
+        self.cmd = conf['run']
 
     def show(self, line_start=''):
         s = line_start + Color.LIGHT_GREEN + self.name + ":\n"
-        s += line_start + '\t' + self.cmd + Color.ENDC
+        s += line_start + '  ' + self.cmd + Color.ENDC
         s = s.replace('@', Color.LIGHT_RED + '@' + Color.ENDC)
         s = s.replace('--tags', Color.YELLOW + '--tags')
         s = s.replace(',', Color.YELLOW + ',')
@@ -44,7 +79,7 @@ class TestWithReport:
     def create_command(self, output_dir_path):
         command = self.test.create_command(output_dir_path)
 
-        report_file = os.path.join(output_dir_path, 'report.html')
+        report_file = path.join(output_dir_path, 'report.html')
         command.append('--format')
         command.append('html')
         command.append('--out')
