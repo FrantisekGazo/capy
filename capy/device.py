@@ -109,6 +109,8 @@ class BaseDevice(object):
 # iOS Device
 ################################
 class IosDevice(BaseDevice):
+    CLI_TOOL = 'ideviceinstaller'
+
     def __init__(self, platform, name, uuid, ip):
         super(IosDevice, self).__init__(platform, name)
         self.ENV["BUNDLE_ID"] = platform.app_id
@@ -127,15 +129,16 @@ class IosDevice(BaseDevice):
         s += '\n' + line_start + Color.YELLOW + '\t- IP: ' + Color.ENDC + '%s' % self.ENV["DEVICE_ENDPOINT"] + Color.ENDC
         return s
 
+    def check_cli_tool(self):
+        self.call(['brew', 'install', self.CLI_TOOL])
+
     def install(self):
-        self.call(['curl', '-O',
-                   'https://raw.githubusercontent.com/FrantisekGazo/capy/master/scripts/transporter_chief.rb'])
-        self.call(['ruby', 'transporter_chief.rb', self.platform.build_path])
-        self.call(['rm', 'transporter_chief.rb'])
-        self.call(['rm', 'ios-deploy'])
+        self.check_cli_tool()
+        self.call([self.CLI_TOOL, '-i', self.platform.build_path])
 
     def uninstall(self):
-        print 'Not supported for now'
+        self.check_cli_tool()
+        self.call([self.CLI_TOOL, '-U', self.platform.app_id])
 
 
 ################################

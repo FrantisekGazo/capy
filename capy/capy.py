@@ -10,34 +10,41 @@ from util import Color
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.6.2'
+VERSION = '0.7.0'
 
 
 def check_version():
     msg = check_package(NAME, VERSION)
     if msg:
         c = Color.LIGHT_GREEN
-        print c + '+-----------------------------------------'
-        print c + '| ' + msg
-        print c + '|'
-        print c + '| Please run: ' + Color.ENDC + 'pip install -U ' + NAME
-        print c + '+-----------------------------------------' + Color.ENDC
+        print c + '+----------------------------------------+'
+        print c + '| {m:30}'.format(m=msg) + c + ' |'
+        print c + '| {m:38}'.format(m=' ') + c + ' |'
+        print c + '| {m:42}'.format(m='Please run: ' + Color.ENDC + 'pip install -U ' + NAME) + c + ' |'
+        print c + '+----------------------------------------+' + Color.ENDC
 
 
 def check_package(name, current_version):
+    print 'Start check: %s (%s)' % (name, current_version)
     pypi = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
     available = pypi.package_releases(name)
+    print '1: %s' % available
     if not available:
         # Try to capitalize pkg name
         available = pypi.package_releases(name.capitalize())
+    print '2: %s' % available
 
     msg = name
     if not available:
+        print '3'
         msg = None
     elif available[0] != current_version:
+        print '4: %s' % available[0]
         msg += ' has new release (%s) available' % available[0]
     else:
+        print '5'
         msg = None
+    print 'Finish check: %s' % msg
     return msg
 
 
@@ -160,5 +167,7 @@ def main():
 # run
 ################################
 if __name__ == '__main__':
+    print 'run main'
     main()
+    print 'run check'
     check_version()
