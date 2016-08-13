@@ -2,6 +2,7 @@
 
 import argparse
 import subprocess
+import xmlrpclib
 from datetime import datetime
 from conf import Config
 from util import Color
@@ -9,7 +10,35 @@ from util import Color
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.5.14'
+VERSION = '0.6.0'
+
+
+def check_version():
+    msg = check_package(NAME, VERSION)
+    if msg:
+        c = Color.LIGHT_GREEN
+        print c + '+-----------------------------------------'
+        print c + '| ' + msg
+        print c + '|'
+        print c + '| Please run: ' + Color.ENDC + 'pip install -U ' + NAME
+        print c + '+-----------------------------------------' + Color.ENDC
+
+
+def check_package(name, current_version):
+    pypi = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+    available = pypi.package_releases(name)
+    if not available:
+        # Try to capitalize pkg name
+        available = pypi.package_releases(name.capitalize())
+
+    msg = name
+    if not available:
+        msg = None
+    elif available[0] != current_version:
+        msg += ' has new release (%s) available' % available[0]
+    else:
+        msg = None
+    return msg
 
 
 def get_config():
@@ -30,9 +59,9 @@ def run(device_name, test_name, with_report=False):
     # show time
     end_time = datetime.now().replace(microsecond=0)
     diff = end_time - start_time
-    print '--------------------------------------------------------------------------'
+    print '+-------------------------------------------------------------------------'
     print '| Total testing time is: ', diff
-    print '--------------------------------------------------------------------------'
+    print '+-------------------------------------------------------------------------'
 
 
 def console(device_name):
@@ -46,19 +75,19 @@ def console(device_name):
 def list():
     config = get_config()
 
-    line_start = Color.GREEN + '|'
+    line_start = Color.GREEN
 
-    print line_start + "------------------------------------------------------------------------------------"
-    print line_start + " DEVICES:"
-    print line_start
+    print line_start + '+------------------------------------------------------------------------------------'
+    print line_start + '| DEVICES:'
+    print line_start + '|'
     for device in config.devices:
-        print device.show(line_start + ' ')
-    print line_start + "------------------------------------------------------------------------------------"
-    print line_start + " TESTS:"
-    print line_start
+        print device.show(line_start + '| ')
+    print line_start + '|------------------------------------------------------------------------------------'
+    print line_start + '| TESTS:'
+    print line_start + '|'
     for test in config.tests:
-        print test.show(line_start + ' ')
-    print line_start + "------------------------------------------------------------------------------------"
+        print test.show(line_start + '| ')
+    print line_start + '+------------------------------------------------------------------------------------' + Color.ENDC
 
 
 def version():
@@ -132,3 +161,4 @@ def main():
 ################################
 if __name__ == '__main__':
     main()
+    check_version()
