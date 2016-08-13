@@ -5,6 +5,7 @@ import sys
 import yaml
 from device import PlatformSetup, AndroidDevice, IosDevice
 from test import Test, TestWithReport
+from bds import BuildManager
 
 
 def merge(user, default):
@@ -23,6 +24,7 @@ def merge(user, default):
 class Config:
     def __init__(self, file_name, private_file_name):
         self.data = self.load_setup(file_name, private_file_name)
+        self.build_manager = BuildManager(self.data.get('bds', None))
         # config
         self.config = self.load_config()
         # devices

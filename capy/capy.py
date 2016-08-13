@@ -10,7 +10,7 @@ from util import Color
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.7.0'
+VERSION = '0.7.1'
 
 
 def check_version():
@@ -167,7 +167,12 @@ def main():
 # run
 ################################
 if __name__ == '__main__':
-    print 'run main'
-    main()
-    print 'run check'
-    check_version()
+
+    config = get_config()
+
+    config.build_manager.check_and_get_build_path('ios', 'inUnstable')
+
+    #print 'run main'
+    #main()
+    #print 'run check'
+    #check_version()
