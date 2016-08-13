@@ -62,12 +62,12 @@ class Config:
         return self.data['config']
 
     def load_platform_setup(self, platform_name):
-        output_dir = self.get_path(self.config['output'], default='.')
+        output_dir = self.config.get('output_path', '.')
         platform_config = self.config[platform_name.lower()]
         return PlatformSetup(
                 name=platform_name,
                 app_id=platform_config['app_id'],
-                build_path=self.get_path(platform_config['build']),
+                build_path=platform_config['build_path'],
                 build_download_cmd=platform_config.get('download', ''),
                 output_dir=output_dir
         )
@@ -98,15 +98,6 @@ class Config:
 
     def load_tests(self):
         return [Test(name, tags) for name, tags in self.data['tests'].iteritems()]
-
-    def get_path(self, params, default=None):
-        if 'path' in params:
-            return params['path']
-        elif 'env' in params:
-            key = params['env']
-            return os.environ.get(key, default)
-        else:
-            raise Exception('Wrong path')
 
     def get_device(self, name):
         for device in self.devices:
