@@ -19,7 +19,12 @@ class Test:
         self.cmd = cmd
 
     def show(self, line_start=''):
-        return line_start + Color.LIGHT_YELLOW + self.name + ": " + Color.LIGHT_BLUE + self.cmd + Color.ENDC
+        s = line_start + Color.LIGHT_GREEN + self.name + ":\n"
+        s += line_start + '\t' + self.cmd + Color.ENDC
+        s = s.replace('@', Color.LIGHT_RED + '@' + Color.ENDC)
+        s = s.replace('--tags', Color.YELLOW + '--tags')
+        s = s.replace(',', Color.YELLOW + ',')
+        return s
 
     def create_command(self, output_dir_path):
         return self.cmd.split(' ')
