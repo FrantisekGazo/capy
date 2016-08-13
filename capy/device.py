@@ -87,8 +87,8 @@ class BaseDevice(object):
         shutil.move(tmp_out, dir_out)
         shutil.rmtree(tmp)
 
-    def show(self):
-        return Color.LIGHT_YELLOW + ' %s ' % self.name + Color.YELLOW + '(%s)' % self.platform.name + Color.ENDC
+    def show(self, line_start=''):
+        return line_start + Color.LIGHT_YELLOW + '%s ' % self.name + Color.YELLOW + '(%s)' % self.platform.name + Color.ENDC
 
     def reports_dir(self, parent=None):
         dir = 'reports/%s-%s/' % (self.platform.name, self.name)
@@ -121,10 +121,10 @@ class IosDevice(BaseDevice):
     def get_run_cmd(self):
         return ['cucumber', '-p', 'ios']
 
-    def show(self):
-        s = super(IosDevice, self).show()
-        s +=  '\n\t- ' + Color.RED + 'UUID: ' + Color.LIGHT_BLUE + '%s' % self.ENV["DEVICE_TARGET"] + Color.ENDC
-        s += '\n\t- ' + Color.RED + 'IP: ' + Color.LIGHT_BLUE + '%s' % self.ENV["DEVICE_ENDPOINT"] + Color.ENDC
+    def show(self, line_start=''):
+        s = super(IosDevice, self).show(line_start=line_start)
+        s += '\n' + line_start + '\t- ' + Color.RED + 'UUID: ' + Color.LIGHT_BLUE + '%s' % self.ENV["DEVICE_TARGET"] + Color.ENDC
+        s += '\n' + line_start + '\t- ' + Color.RED + 'IP: ' + Color.LIGHT_BLUE + '%s' % self.ENV["DEVICE_ENDPOINT"] + Color.ENDC
         return s
 
     def install(self):

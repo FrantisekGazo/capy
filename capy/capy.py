@@ -9,7 +9,7 @@ from util import Color
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.5.13'
+VERSION = '0.5.14'
 
 
 def get_config():
@@ -52,12 +52,12 @@ def list():
     print line_start + " DEVICES:"
     print line_start
     for device in config.devices:
-        print line_start + device.show()
+        print device.show(line_start + ' ')
     print line_start + "------------------------------------------------------------------------------------"
     print line_start + " TESTS:"
     print line_start
     for test in config.tests:
-        print line_start + test.show()
+        print test.show(line_start + ' ')
     print line_start + "------------------------------------------------------------------------------------"
 
 

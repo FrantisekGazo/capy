@@ -18,8 +18,8 @@ class Test:
         self.name = name
         self.cmd = cmd
 
-    def show(self):
-        return Color.LIGHT_YELLOW + " " + self.name + ": " + Color.LIGHT_BLUE + self.cmd + Color.ENDC
+    def show(self, line_start=''):
+        return line_start + Color.LIGHT_YELLOW + self.name + ": " + Color.LIGHT_BLUE + self.cmd + Color.ENDC
 
     def create_command(self, output_dir_path):
         return self.cmd.split(' ')
