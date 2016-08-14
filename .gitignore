@@ -19,4 +19,5 @@ capy_private.yaml
 
 # distribution
 dist
+build
 capy.egg-info

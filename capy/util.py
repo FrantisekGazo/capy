@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+
+TMP_DIR = '.capy/'
 
 class Color:
     ENDC = '\033[0m'
@@ -22,3 +25,13 @@ class Color:
     LIGHT_MANGETA = '\033[95m'
     LIGHT_CYAN = '\033[96m'
     WHITE = '\033[97m'
+
+
+def merge(user, default):
+    if isinstance(user, dict) and isinstance(default, dict):
+        for k, v in default.iteritems():
+            if k not in user:
+                user[k] = v
+            else:
+                user[k] = merge(user[k], v)
+    return user
