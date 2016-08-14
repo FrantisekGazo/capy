@@ -52,7 +52,6 @@ def get_config():
     return Config(file_name='capy_conf.yaml', private_file_name='capy_private.yaml')
 
 
-# FIXME: not working after refactoring
 def run(build_name, device_name, test_name, with_report=False):
     config = get_config()
 
@@ -61,9 +60,9 @@ def run(build_name, device_name, test_name, with_report=False):
 
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
-    test = config.test_manager.get_test(test_name, report=with_report)
+    test = config.test_manager.get_test(test_name)
     print Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC
-    device.run(build, test)
+    device.run(build, test, report=with_report)
 
     # show time
     end_time = datetime.now().replace(microsecond=0)
@@ -116,8 +115,9 @@ def version():
 
 def download(build_name, os):
     config = get_config()
-    print Color.GREEN + "Downloading build '%s' for '%s'..." % (build_name, os) + Color.ENDC
-    config.build_manager.download(os, build_name)
+    build = config.build_manager.check_and_get_build(os, build_name)
+    print Color.GREEN + "Downloading build '%s' for '%s'..." % (build.name, build.os) + Color.ENDC
+    config.build_manager.download(build)
 
 
 def install(build_name, device_name):

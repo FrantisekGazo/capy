@@ -29,10 +29,10 @@ class TestManager(object):
 
         return tests
 
-    def get_test(self, name, report=False):
+    def get_test(self, name):
         test = self.tests.get(name, None)
         if test:
-            return TestWithReport(test) if report else test
+            return test
         else:
             print Color.LIGHT_RED + "Test '%s' was not found" % name + Color.ENDC
             sys.exit(1)
@@ -40,8 +40,6 @@ class TestManager(object):
 
 ################################################################
 # Test
-#
-# this won't generate report
 #
 # NOTE: Scenarios won't necessarily run in order of given tags
 # (Calabash goes through all feature files and their scenarios
@@ -61,30 +59,16 @@ class Test:
         s = s.replace(',', Color.YELLOW + ',')
         return s
 
-    def create_command(self, output_dir_path):
-        return self.cmd.split(' ')
+    def create_command(self, output_dir_path, report=False):
+        command = self.cmd.split(' ')
 
-
-################################################################
-#
-# Report
-#
-# this will generate a report when test is done
-#
-################################################################
-class TestWithReport:
-    def __init__(self, test):
-        self.test = test
-
-    def create_command(self, output_dir_path):
-        command = self.test.create_command(output_dir_path)
-
-        report_file = path.join(output_dir_path, 'report.html')
-        command.append('--format')
-        command.append('html')
-        command.append('--out')
-        command.append(report_file)
-        command.append('--format')
-        command.append('pretty')
+        if report:
+            report_file = path.join(output_dir_path, 'report.html')
+            command.append('--format')
+            command.append('html')
+            command.append('--out')
+            command.append(report_file)
+            command.append('--format')
+            command.append('pretty')
 
         return command

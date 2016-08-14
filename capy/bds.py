@@ -22,7 +22,7 @@ class BuildManager(object):
             print Color.LIGHT_RED + 'BDS configuration is missing' + Color.ENDC
             sys.exit(1)
 
-        self.build_dir = conf.get('build_dir', path.join(TMP_DIR + 'builds/'))
+        conf['build_dir'] = conf.get('build_dir', path.join(TMP_DIR + 'builds/'))
         self.token = self.load(conf, 'token')
         self.customer = self.load(conf, 'customer')
         self.project = self.load(conf, 'project')
@@ -32,8 +32,7 @@ class BuildManager(object):
             self.load_builds(conf, os=os)
 
     # public
-    def download(self, os, build_name):
-        build = self.get_build(os, build_name)
+    def download(self, build):
         # load build from BDS
         bds_build = self.get_latest_bds_build(build)
         download_url = bds_build['download_url']
@@ -43,7 +42,7 @@ class BuildManager(object):
         r = subprocess.call(['curl', '-o', download_to, download_url])
         if r == 0:
             print Color.BLUE + 'Downloaded to ' + download_to + Color.ENDC
-            if os == OS.Android:
+            if build.os == OS.Android:
                 print Color.BLUE + 'Resigning apk...' + Color.ENDC
                 subprocess.call(['calabash-android', 'resign', download_to])
 
@@ -54,7 +53,7 @@ class BuildManager(object):
 
         build_path = build.get_path()
         if not path.exists(build_path):
-            self.download(build.os, build.name)
+            self.download(build)
 
         return build
 

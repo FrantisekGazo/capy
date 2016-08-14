@@ -68,9 +68,9 @@ class BaseDevice(object):
     def get_console_cmd(self, build):
         return []  # implement
 
-    def run(self, build, test):
+    def run(self, build, test, report=False):
         cmd = self.get_run_cmd(build)
-        self.show_and_run(cmd, test)
+        self.show_and_run(cmd, test, report)
 
     def get_run_cmd(self, build):
         return []  # implement
@@ -81,12 +81,12 @@ class BaseDevice(object):
     def uninstall(self, build):
         pass  # implement
 
-    def show_and_run(self, base_cmd, test):
+    def show_and_run(self, base_cmd, test, report):
         tmp = TMP_DIR
         tmp_out = self.current_report_dir(tmp)
         dir_out = self.reports_dir(test.output_dir)
 
-        cmd = base_cmd + test.create_command(tmp_out)
+        cmd = base_cmd + test.create_command(tmp_out, report)
         # show commands
         print '--------------------------------------------------------------------------'
         print '| Commands: '
