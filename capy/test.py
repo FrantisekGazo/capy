@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 from os import path
 from util import Color, merge, TMP_DIR
 
@@ -13,15 +14,15 @@ class TestManager(object):
             print Color.LIGHT_RED + 'TESTS configuration is missing' + Color.ENDC
             sys.exit(1)
 
-        self.output_dir = conf.get('output_dir', path.join(TMP_DIR))
-        conf['output_dir'] = self.output_dir
+        conf['output_dir'] = conf.get('output_dir', path.join(TMP_DIR))
+        conf['env'] = conf.get('env', {})
         self.tests = self.load_tests(conf)
 
     def load_tests(self, conf):
         tests = {}
 
         for name, info in conf.iteritems():
-            if name == 'output_dir':
+            if name in ['output_dir', 'env']:
                 continue
 
             info = merge(info, conf)
@@ -49,18 +50,22 @@ class Test:
     def __init__(self, name, conf):
         self.name = name
         self.output_dir = conf['output_dir']
-        self.cmd = conf['run']
+        self.env = conf['env']
+        self.run = conf.get('run', None)
+        if not self.run:
+            print Color.LIGHT_RED + "Test '%s' is missing a 'run: ...'" % name + Color.ENDC
+            sys.exit(1)
 
     def show(self, line_start=''):
         s = line_start + Color.LIGHT_GREEN + self.name + ":\n"
-        s += line_start + '  ' + self.cmd + Color.ENDC
+        s += line_start + '  ' + self.run + Color.ENDC
         s = s.replace('@', Color.LIGHT_RED + '@' + Color.ENDC)
         s = s.replace('--tags', Color.YELLOW + '--tags')
         s = s.replace(',', Color.YELLOW + ',')
         return s
 
     def create_command(self, output_dir_path, report=False):
-        command = self.cmd.split(' ')
+        command = self.run.split(' ')
 
         if report:
             report_file = path.join(output_dir_path, 'report.html')

@@ -5,7 +5,7 @@ import time
 import sys
 import subprocess
 import shutil
-from util import Color, TMP_DIR
+from util import Color, merge, TMP_DIR
 from device_os import OS
 
 
@@ -87,6 +87,7 @@ class BaseDevice(object):
         dir_out = self.reports_dir(test.output_dir)
 
         cmd = base_cmd + test.create_command(tmp_out, report)
+        self.ENV = merge(test.env, self.ENV)
         # show commands
         print '--------------------------------------------------------------------------'
         print '| Commands: '
