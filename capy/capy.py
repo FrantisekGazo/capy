@@ -10,7 +10,7 @@ from util import Color
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.7.1'
+VERSION = '0.8.1'
 
 
 def check_version():
@@ -115,7 +115,7 @@ def version():
 
 def download(build_name, os):
     config = get_config()
-    build = config.build_manager.check_and_get_build(os, build_name)
+    build = config.build_manager.get_build(os, build_name)
     print Color.GREEN + "Downloading build '%s' for '%s'..." % (build.name, build.os) + Color.ENDC
     config.build_manager.download(build)
 
