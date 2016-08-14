@@ -10,7 +10,7 @@ from util import Color
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.8.5'
+VERSION = '0.8.7'
 
 
 ####################################################################################################

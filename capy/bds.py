@@ -46,7 +46,6 @@ class BuildManager(object):
                 print Color.BLUE + 'Resigning apk...' + Color.ENDC
                 subprocess.call(['calabash-android', 'resign', download_to])
 
-
     # public
     def check_and_get_build(self, os, build_name):
         build = self.get_build(os, build_name)
@@ -91,10 +90,28 @@ class BuildManager(object):
     def load_builds(self, conf, os):
         builds = {}
 
-        for name, info in conf.get(os, {}).iteritems():
-            info = merge(info, conf)
+        os_conf = conf.get(os, {})
+
+        default_build_name = os_conf.get('default', None)
+        default_build_found = False
+        if not default_build_name:
+            print Color.LIGHT_RED + "BDS is missing default build for '%s'" % os + Color.ENDC
+            sys.exit(1)
+
+        for name, info in os_conf.iteritems():
+            if name == 'default':
+                continue
+
+            info['build_dir'] = info.get('build_dir', conf['build_dir'])
             build = Build(os, name, info)
+            if name == default_build_name:
+                build.is_default = True
+                default_build_found = True
             builds[name] = build
+
+        if not default_build_found:
+            print Color.LIGHT_RED + "'%s' default build '%s' was not found" % (os, default_build_name) + Color.ENDC
+            sys.exit(1)
 
         self.builds[os] = builds
 
@@ -125,13 +142,13 @@ class Build(object):
     def __init__(self, os, name, info):
         self.os = os
         self.name = name
+        self.is_default = False
         self.app_id = info.get('app_id', None)
         if not self.app_id:
             print Color.LIGHT_RED + "BDS Build '%s' must specify an 'app_id'" % self.name + Color.ENDC
             sys.exit(1)
         self.env = info.get('env', None)
         self.conf = info.get('conf', None)
-        self.is_default = info.get('default', False)
         self.build_dir = info['build_dir']
         # prepare path
         extension = '.apk' if os == OS.Android else '.ipa'
@@ -146,7 +163,11 @@ class Build(object):
 
     # public
     def show(self, line_start=''):
-        s = line_start + Color.LIGHT_GREEN + self.name
+        if self.is_default:
+            s = line_start + Color.LIGHT_RED + self.name + Color.RED + ' (default)'
+        else:
+            s = line_start + Color.LIGHT_GREEN + self.name
+
         s += '\n' + line_start + Color.YELLOW + '  - app ID: ' + Color.ENDC + self.app_id
         if self.env:
             s += '\n' + line_start + Color.YELLOW + '  - env: ' + Color.ENDC + self.env
