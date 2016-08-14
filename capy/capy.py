@@ -10,13 +10,12 @@ from util import Color
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.8.2'
+VERSION = '0.8.5'
 
 
-def fake_check():
-    print 'Fake check'
-
-
+####################################################################################################
+# Version check
+####################################################################################################
 def check_version():
     msg = check_package(NAME, VERSION)
     if msg:
@@ -29,31 +28,44 @@ def check_version():
 
 
 def check_package(name, current_version):
-    print 'Start check: %s (%s)' % (name, current_version)
     pypi = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
     available = pypi.package_releases(name)
-    print '1: %s' % available
     if not available:
         # Try to capitalize pkg name
         available = pypi.package_releases(name.capitalize())
-    print '2: %s' % available
 
     msg = name
     if not available:
-        print '3'
         msg = None
     elif available[0] != current_version:
-        print '4: %s' % available[0]
         msg += ' has new release (%s) available' % available[0]
     else:
-        print '5'
         msg = None
-    print 'Finish check: %s' % msg
     return msg
 
 
+####################################################################################################
+# Helper methods
+####################################################################################################
 def get_config():
     return Config(file_name='capy_conf.yaml', private_file_name='capy_private.yaml')
+
+
+def read_build(args):
+    return args.build[0] if args.build else None
+
+
+def version():
+    print '%s %s' % (NAME, VERSION)
+    print DESCRIPTION
+
+
+def console(build_name, device_name):
+    config = get_config()
+    device = config.device_manager.get_device(device_name)
+    build = config.build_manager.check_and_get_build(device.os, build_name)
+    print Color.GREEN + "Opening console for device '%s' with '%s'..." % (device.name, build.name) + Color.ENDC
+    device.run_console(build)
 
 
 def run(build_name, device_name, test_name, with_report=False):
@@ -74,14 +86,6 @@ def run(build_name, device_name, test_name, with_report=False):
     print '+-------------------------------------------------------------------------'
     print '| Total testing time is: ', diff
     print '+-------------------------------------------------------------------------'
-
-
-def console(build_name, device_name):
-    config = get_config()
-    device = config.device_manager.get_device(device_name)
-    build = config.build_manager.check_and_get_build(device.os, build_name)
-    print Color.GREEN + "Opening console for device '%s' with '%s'..." % (device.name, build.name) + Color.ENDC
-    device.run_console(build)
 
 
 def list(builds=False, devices=False, tests=False):
@@ -112,11 +116,6 @@ def list(builds=False, devices=False, tests=False):
         print line_start + '+------------------------------------------------------------------------------------' + Color.ENDC
 
 
-def version():
-    print '%s %s' % (NAME, VERSION)
-    print DESCRIPTION
-
-
 def download(build_name, os):
     config = get_config()
     build = config.build_manager.get_build(os, build_name)
@@ -140,6 +139,9 @@ def uninstall(build_name, device_name):
     device.uninstall(build)
 
 
+###########################################################
+# Main
+###########################################################
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--build', nargs=1, metavar='B',
@@ -201,17 +203,12 @@ def main():
     else:
         parser.parse_args(['--help'])
 
-
-def read_build(args):
-    return args.build[0] if args.build else None
+    # check for updates
+    check_version()
 
 
 ################################
-# run
+# run main
 ################################
 if __name__ == '__main__':
-    print 'run main'
     main()
-    print 'run check'
-    fake_check()
-    # check_version()
