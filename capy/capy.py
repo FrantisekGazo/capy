@@ -10,7 +10,7 @@ from test import TestAction
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 
 ####################################################################################################
@@ -116,7 +116,7 @@ def list(builds=False, devices=False, tests=False):
 
     line_start = Color.GREEN
 
-    print line_start + '+------------------------------------------------------------------------------------'
+    print line_start + '+------------------------------------------------------------------------------------' + Color.ENDC
     if builds:
         print line_start + '| ' + Color.LIGHT_YELLOW + 'BUILDS:'
         print line_start + '|'
@@ -124,13 +124,13 @@ def list(builds=False, devices=False, tests=False):
             print line_start + '| ' + os
             for name, build in sorted(builds_dict.iteritems()):
                 print build.show(line_start + '|    ')
-        print line_start + '|------------------------------------------------------------------------------------'
+        print line_start + '|------------------------------------------------------------------------------------' + Color.ENDC
     if devices:
         print line_start + '| ' + Color.LIGHT_YELLOW + 'DEVICES:'
         print line_start + '|'
         for name, device in sorted(config.device_manager.devices.iteritems()):
             print device.show(line_start + '| ')
-        print line_start + '|------------------------------------------------------------------------------------'
+        print line_start + '|------------------------------------------------------------------------------------' + Color.ENDC
     if tests:
         print line_start + '| ' + Color.LIGHT_YELLOW + 'TESTS:'
         print line_start + '|'
