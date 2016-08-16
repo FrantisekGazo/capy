@@ -80,7 +80,11 @@ class Test:
             s += line_start + Color.YELLOW + '  before: ' + Color.ENDC + ', '.join(self.before) + Color.ENDC
         if self.after:
             s += '\n'
-            s += line_start + Color.YELLOW + '  after: ' + Color.ENDC + ', '.join(self.after) + Color.ENDC
+            s += line_start + Color.YELLOW + '  after: ' + Color.ENDC + ', '.join(self.after)
+        # show ENV
+        if self.env:
+            s += '\n'
+            s += line_start + Color.YELLOW + '  env: ' + Color.ENDC + str(self.env)
 
         return s
 
