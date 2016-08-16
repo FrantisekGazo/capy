@@ -10,7 +10,7 @@ from test import TestAction
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.9.1'
+VERSION = '0.9.2'
 
 
 ####################################################################################################
@@ -75,12 +75,15 @@ def run(build_name, device_name, test_name, with_report=False):
     start_time = datetime.now().replace(microsecond=0)
 
     device = config.device_manager.get_device(device_name)
-    build = config.build_manager.check_and_get_build(device.os, build_name)
+    build = config.build_manager.get_build(device.os, build_name)
     test = config.test_manager.get_test(test_name)
 
     if test.before:
         for action in test.before:
             exec_action(action, config, build, device)
+
+    # just to make sure build is available (this will download it if not)
+    build = config.build_manager.check_and_get_build(device.os, build_name)
 
     print Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC
     device.run(build, test, report=with_report)
