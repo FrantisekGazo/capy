@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 import argparse
-import subprocess
 import xmlrpclib
 from datetime import datetime
 from conf import Config
 from util import Color
+from test import TestAction
 
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.8.7'
+VERSION = '0.9.0'
 
 
 ####################################################################################################
@@ -77,8 +77,17 @@ def run(build_name, device_name, test_name, with_report=False):
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
     test = config.test_manager.get_test(test_name)
+
+    if test.before:
+        for action in test.before:
+            exec_action(action, config, build, device)
+
     print Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC
     device.run(build, test, report=with_report)
+
+    if test.after:
+        for action in test.after:
+            exec_action(action, config, build, device)
 
     # show time
     end_time = datetime.now().replace(microsecond=0)
@@ -86,6 +95,17 @@ def run(build_name, device_name, test_name, with_report=False):
     print '+-------------------------------------------------------------------------'
     print '| Total testing time is: ', diff
     print '+-------------------------------------------------------------------------'
+
+
+def exec_action(test_action, config, build, device):
+    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (
+    test_action, device.name, build.name) + Color.ENDC
+    if test_action == TestAction.DOWNLOAD:
+        config.build_manager.download(build)
+    elif test_action == TestAction.INSTALL:
+        device.install(build)
+    elif test_action == TestAction.UNINSTALL:
+        device.uninstall(build)
 
 
 def list(builds=False, devices=False, tests=False):
