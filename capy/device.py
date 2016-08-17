@@ -168,6 +168,8 @@ class IosDevice(BaseDevice):
 # Android Device
 ################################
 class AndroidDevice(BaseDevice):
+    CLI_TOOL = 'adb'
+
     def __init__(self, name):
         super(AndroidDevice, self).__init__(OS.Android, name)
 
@@ -177,9 +179,12 @@ class AndroidDevice(BaseDevice):
     def get_run_cmd(self, build):
         return ['calabash-android', 'run', build.get_path(), '-p', 'android']
 
+    def check_cli_tool(self):
+        self.call(['brew', 'install', self.CLI_TOOL])
+
     def install(self, build):
         self.call(['calabash-android', 'build', build.get_path()])  # rebuild test-server
-        self.call(['adb', 'install', '-r', build.get_path()])  # install app
+        self.call([self.CLI_TOOL, 'install', '-r', build.get_path()])  # install app
 
     def uninstall(self, build):
-        self.call(['adb', 'uninstall', build.app_id])
+        self.call([self.CLI_TOOL, 'uninstall', build.app_id])
