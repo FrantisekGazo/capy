@@ -105,7 +105,7 @@ class BaseDevice(object):
         # move files if necessary
         if tmp != test.output_dir:
             shutil.move(tmp_out, dir_out)
-            shutil.rmtree(tmp)
+            shutil.rmtree(tmp_out)
 
     def show(self, line_start=''):
         return line_start + Color.LIGHT_GREEN + '%s ' % self.name + Color.YELLOW + '(%s)' % self.os + Color.ENDC
