@@ -1,6 +1,30 @@
 #!/usr/bin/env python
 
+import sys
+import subprocess
+import re
+from os import environ, path
+
 TMP_DIR = '.capy/'
+
+
+def merge(user, default):
+    if isinstance(user, dict) and isinstance(default, dict):
+        for k, v in default.iteritems():
+            if k not in user:
+                user[k] = v
+            else:
+                user[k] = merge(user[k], v)
+    return user
+
+
+def get(conf, prop, default):
+    p = conf.get(prop, None)
+    if p:
+        return p
+    else:
+        return default
+
 
 class Color:
     ENDC = '\033[0m'
@@ -27,18 +51,24 @@ class Color:
     WHITE = '\033[97m'
 
 
-def merge(user, default):
-    if isinstance(user, dict) and isinstance(default, dict):
-        for k, v in default.iteritems():
-            if k not in user:
-                user[k] = v
-            else:
-                user[k] = merge(user[k], v)
-    return user
+class Logger(object):
+    def __init__(self):
+        self.path = path.join(TMP_DIR, 'logfile.log')
+        self.terminal = sys.stdout
 
-def get(conf, prop, default):
-    p = conf.get(prop, None)
-    if p:
-        return p
-    else:
-        return default
+    def write(self, message):
+        self.terminal.write(message)
+        colorless = re.sub(r"\[[0-9]{1,2}m", "", message)
+        with open(self.path, "a") as log_file:
+            log_file.write(colorless)
+
+    def flush(self):
+        # this flush method is needed for python 3 compatibility.
+        # this handles the flush command by doing nothing.
+        # you might want to specify some extra behavior here.
+        pass
+
+    def fileno(self):
+        self.terminal.fileno()
+
+SHARED_LOGGER = Logger()

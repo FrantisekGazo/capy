@@ -5,7 +5,7 @@ import time
 import sys
 import subprocess
 import shutil
-from util import Color, merge, TMP_DIR
+from util import Color, merge, TMP_DIR, SHARED_LOGGER
 from device_os import OS
 
 
@@ -59,7 +59,7 @@ class BaseDevice(object):
         self.ENV = environ.copy()
 
     def call(self, cmd):
-        subprocess.call(cmd, env=self.ENV)
+        subprocess.call(cmd, env=self.ENV, stdout=SHARED_LOGGER)
 
     def run_console(self, build):
         cmd = self.get_console_cmd(build)

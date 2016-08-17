@@ -5,7 +5,7 @@ from os import path, makedirs
 import subprocess
 import json
 from device_os import OS
-from util import Color, merge, TMP_DIR
+from util import Color, TMP_DIR, SHARED_LOGGER
 
 
 ################################
@@ -39,12 +39,12 @@ class BuildManager(object):
         print Color.BLUE + 'Downloading from url %s...' % download_url + Color.ENDC
         # download
         download_to = build.get_path()
-        r = subprocess.call(['curl', '-o', download_to, download_url])
+        r = subprocess.call(['curl', '-o', download_to, download_url], stdout=SHARED_LOGGER)
         if r == 0:
             print Color.BLUE + 'Downloaded to ' + download_to + Color.ENDC
             if build.os == OS.Android:
                 print Color.BLUE + 'Resigning apk...' + Color.ENDC
-                subprocess.call(['calabash-android', 'resign', download_to])
+                subprocess.call(['calabash-android', 'resign', download_to], stdout=SHARED_LOGGER)
 
     # public
     def check_and_get_build(self, os, build_name):

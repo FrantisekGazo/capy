@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+import sys
 import argparse
 import xmlrpclib
 from datetime import datetime
 from conf import Config
-from util import Color
+from util import Color, SHARED_LOGGER
 from test import TestAction
 
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
@@ -166,6 +167,8 @@ def uninstall(build_name, device_name):
 # Main
 ###########################################################
 def main():
+    sys.stdout = SHARED_LOGGER
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--build', nargs=1, metavar='B',
                         help="Choose different build B to use for tests")
