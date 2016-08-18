@@ -45,6 +45,9 @@ class BuildManager(object):
             if build.os == OS.Android:
                 print Color.BLUE + 'Resigning apk...' + Color.ENDC
                 subprocess.call(['calabash-android', 'resign', download_to])
+        else:
+            print Color.LIGHT_RED + 'BDS build could not be downloaded' + Color.ENDC
+            sys.exit(1)
 
     # public
     def check_and_get_build(self, os, build_name):
@@ -134,8 +137,11 @@ class BuildManager(object):
         proc = subprocess.Popen(c, shell=True, stdout=subprocess.PIPE)
         proc.wait()
         response = proc.communicate()[0]
-
-        return json.loads(response)['builds'][0]
+        try:
+            return json.loads(response)['builds'][0]
+        except:
+            print Color.LIGHT_RED + 'No BDS build was found' + Color.ENDC
+            sys.exit(1)
 
 
 class Build(object):
