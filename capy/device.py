@@ -84,7 +84,7 @@ class BaseDevice(object):
     def show_and_run(self, base_cmd, test, report):
         tmp = TMP_DIR
         tmp_out = self.current_report_dir(tmp)
-        dir_out = self.reports_dir(test.output_dir)
+        dir_out = self.device_reports_dir(test.output_dir)
 
         cmd = base_cmd + test.create_command(tmp_out, report)
         self.ENV = merge(test.env, self.ENV)
@@ -111,15 +111,21 @@ class BaseDevice(object):
         return line_start + Color.LIGHT_GREEN + '%s ' % self.name + Color.YELLOW + '(%s)' % self.os + Color.ENDC
 
     def reports_dir(self, parent=None):
-        dir = 'reports/%s-%s/' % (self.os, self.name)
+        dir = 'reports/'
         if parent:
             dir = path.join(parent, dir)
             if not path.exists(dir):
                 makedirs(dir)
         return path.abspath(dir)
 
+    def device_reports_dir(self, parent=None):
+        dir = path.join(self.reports_dir(parent), '%s-%s/' % (self.os, self.name))
+        if not path.exists(dir):
+            makedirs(dir)
+        return path.abspath(dir)
+
     def current_report_dir(self, parent=None):
-        dir = path.join(self.reports_dir(parent), time.strftime('%Y_%m_%d-%H_%M_%S'))
+        dir = path.join(self.device_reports_dir(parent), time.strftime('%Y_%m_%d-%H_%M_%S'))
         if not path.exists(dir):
             makedirs(dir)
         return dir
