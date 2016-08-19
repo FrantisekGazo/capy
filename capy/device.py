@@ -5,7 +5,7 @@ import time
 import sys
 import subprocess
 import shutil
-from util import Color, merge, TMP_DIR, STDERR_LOGGER, STDOUT_LOGGER
+from util import Color, merge, TMP_DIR, STDERR_LOGGER, STDOUT_LOGGER, check_cmd
 from device_os import OS
 
 
@@ -168,7 +168,8 @@ class IosDevice(BaseDevice):
         return s
 
     def check_cli_tool(self):
-        self.call(['brew', 'install', self.CLI_TOOL])
+        if not check_cmd(self.CLI_TOOL):
+            self.call(['brew', 'install', self.CLI_TOOL])
 
     def install(self, build):
         self.check_cli_tool()
@@ -195,7 +196,8 @@ class AndroidDevice(BaseDevice):
         return ['calabash-android', 'run', build.get_path(), '-p', 'android']
 
     def check_cli_tool(self):
-        self.call(['brew', 'install', self.CLI_TOOL])
+        if not check_cmd(self.CLI_TOOL):
+            self.call(['brew', 'install', self.CLI_TOOL])
 
     def install(self, build):
         self.call(['calabash-android', 'build', build.get_path()])  # rebuild test-server

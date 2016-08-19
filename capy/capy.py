@@ -11,7 +11,7 @@ from test import TestAction
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.10.0'
+VERSION = '0.10.1'
 
 
 ####################################################################################################
