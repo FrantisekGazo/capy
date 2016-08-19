@@ -5,7 +5,7 @@ import time
 import sys
 import subprocess
 import shutil
-from util import Color, merge, TMP_DIR, STDERR_LOGGER, STDOUT_LOGGER, check_cmd
+from util import Color, merge, TMP_DIR, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, exit_error
 from device_os import OS
 
 
@@ -35,8 +35,7 @@ class DeviceManager(object):
     # private
     def validate_device(self, name, params, param_name):
         if param_name not in params.keys():
-            print Color.LIGHT_RED + "Device '%s' is missing parameter '%s'" % (name, param_name) + Color.ENDC
-            sys.exit(1)
+            exit_error("Device '%s' is missing parameter '%s'" % (name, param_name))
 
     # public
     def get_device(self, name):
@@ -44,8 +43,7 @@ class DeviceManager(object):
         if device:
             return device
         else:
-            print Color.LIGHT_RED + "Device '%s' was not found" % name + Color.ENDC
-            sys.exit(1)
+            exit_error("Device '%s' was not found" % name)
 
 
 ################################

@@ -2,7 +2,7 @@
 
 import sys
 from os import path
-from util import Color, get, merge, TMP_DIR
+from util import Color, get, merge, TMP_DIR, exit_error
 
 
 ################################
@@ -39,8 +39,7 @@ class TestManager(object):
         if test:
             return test
         else:
-            print Color.LIGHT_RED + "Test '%s' was not found" % name + Color.ENDC
-            sys.exit(1)
+            exit_error("Test '%s' was not found" % name)
 
 
 ################################################################
@@ -58,8 +57,7 @@ class Test:
 
         self.run = get(conf, 'run', None)
         if not self.run:
-            print Color.LIGHT_RED + "Test '%s' is missing a 'run: ...'" % name + Color.ENDC
-            sys.exit(1)
+            exit_error("Test '%s' is missing a 'run: ...'" % name)
 
         self.before = get(conf, 'before', [])
         TestAction.validate(self.before)
@@ -115,5 +113,4 @@ class TestAction:
     def validate(cls, actions):
         for action in actions:
             if action not in cls.ALL:
-                print Color.LIGHT_RED + "Test action '%s' is not supported" % action + Color.ENDC
-                sys.exit(1)
+                exit_error("Test action '%s' is not supported" % action)
