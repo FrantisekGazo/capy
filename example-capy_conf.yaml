@@ -1,0 +1,89 @@
+# Build Distribution System
+bds:
+  # (optional) Path to directory for builds
+  build_dir: my/path/to/builds/
+  # Name of customer in bds
+  customer: customer-name
+  # Name of project in bds
+  project: project-name
+
+  # (optional) If you need to use some Android builds, put info here
+  android:
+    # Name of the default build
+    default: inTest
+
+    # Build name
+    inTest:
+      # Application ID
+      app_id: my.app.package.name
+      # (optional) BDS environment
+      env: internal-test
+      # (optional) BDS configuration
+      conf: unstable
+    inRc:
+      app_id: my.app.package.name
+      env: internal-test
+      conf: rc
+    production:
+      app_id: my.app.production.package.name
+      env: customer
+
+  # (optional) If you need to use some iOS builds, put info here
+  ios:
+    # Name of the default build
+    default: inUnstable
+
+    inUnstable:
+      app_id: my.app.bundle.id
+      env: internal-calabash
+      conf: unstable
+    inRc:
+      app_id: my.app.bundle.id
+      env: internal-calabash
+      conf: rc
+
+# List of supported devices
+devices:
+  # (optional) Android devices (one generic device covers all, nothing needs to be specified)
+  android:
+    # Device name
+    a:
+  # (optional) iOS devices (each device has to specify UUID and IP address)
+  ios:
+    # Device name
+    ipad1:
+      # (required) Device UUID
+      uuid: 123456789123456789123456789
+      # (required) Device IP address
+      ip: 10.0.0.1
+    ipad2:
+      uuid: 987654321987654321987654321
+      ip: 10.0.0.2
+
+# List of supported tests (each test has to specify command that will be executed)
+tests:
+  # (optional) Path to directory for test screenshots, reports, ...
+  output_dir: some/dir/
+  # (optional) Add some ENVs
+  env:
+    STUDY_PREFIX: a_
+
+  # (optional) List of actions that should be executed before a test
+  before:
+    - download
+    - install
+  # (optional) List of actions that should be executed after a test
+  after:
+    - uninstall
+
+  # Test name
+  login:
+    # (optional) Override list of actions that should be executed before a test
+    before:
+      - install
+    # (optional) Override list of actions that should be executed after a test
+    after:
+    # command that should be run
+    run: --tags @login --tags @start_app,@valid_login
+  test2:
+    run: --tags @something

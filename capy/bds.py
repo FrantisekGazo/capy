@@ -5,7 +5,7 @@ from os import path, makedirs
 import subprocess
 import json
 from device_os import OS
-from util import Color, TMP_DIR, exit_error
+from util import Color, TMP_DIR, exit_error, get
 
 
 ################################
@@ -98,10 +98,12 @@ class BuildManager(object):
     def load_builds(self, conf, os):
         builds = {}
 
-        os_conf = conf.get(os, {})
+        os_conf = get(conf, os, None)
+        if not os_conf:
+            return
 
-        default_build_name = os_conf.get('default', None)
         default_build_found = False
+        default_build_name = get(os_conf, 'default', None)
         if not default_build_name:
             exit_error("BDS is missing default build for '%s'" % os)
 

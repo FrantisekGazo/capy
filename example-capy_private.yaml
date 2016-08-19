@@ -1,0 +1,8 @@
+# Build Distribution System
+bds:
+  # Token for communication with BDS API
+  token: my-own-bds-token
+
+# You can also add builds, devices and tests that will be used only by you
+
+# You can override any property that is defined in `capy_conf.yaml`
