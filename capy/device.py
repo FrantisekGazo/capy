@@ -15,8 +15,7 @@ from device_os import OS
 class DeviceManager(object):
     def __init__(self, conf, os_list):
         if not conf:
-            print Color.LIGHT_RED + 'DEVICES configuration is missing' + Color.ENDC
-            sys.exit(1)
+            conf = {}
 
         self.devices = {}
         for os in os_list:

@@ -11,8 +11,7 @@ from util import Color, get, merge, TMP_DIR
 class TestManager(object):
     def __init__(self, conf):
         if not conf:
-            print Color.LIGHT_RED + 'TESTS configuration is missing' + Color.ENDC
-            sys.exit(1)
+            conf = {}
 
         conf['output_dir'] = get(conf, 'output_dir', path.join(TMP_DIR))
         conf['env'] = get(conf, 'env', {})

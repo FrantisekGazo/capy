@@ -70,7 +70,7 @@ class BuildManager(object):
     # public
     def get_build(self, os, build_name):
         if build_name:
-            build = self.builds[os].get(build_name, None)
+            build = self.get_builds(os).get(build_name, None)
         else:
             build = self.get_default_build(os)
 
@@ -79,9 +79,17 @@ class BuildManager(object):
         else:
             exit_error("Build with name '%s' does not exists for '%s'!" % (build_name, os))
 
+    # public
+    def get_builds(self, os):
+        builds = self.builds.get(os, None)
+        if builds:
+            return builds
+        else:
+            exit_error("No %s builds were found!" % os)
+
     # private
     def get_default_build(self, os):
-        for name, build in self.builds[os].iteritems():
+        for name, build in self.get_builds(os).iteritems():
             if build.is_default:
                 return build
 
