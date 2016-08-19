@@ -5,13 +5,13 @@ from os import path, makedirs
 import subprocess
 import json
 from device_os import OS
-from util import Color, merge, TMP_DIR
+from util import Color, TMP_DIR
 
 
 ################################
 # Build Manager
 #
-# cli command: curl -O $(curl -u 77df53ebc3234f21862c4be0182dfd0a:'' -s http://inloop-bds.test.inloop.eu/api/v1/customers/medrio/projects/mcapture/applications/ios/environments/internal-calabash/builds/ | python -c 'import sys, json; print json.load(sys.stdin)["builds"][0]["download_url"]')
+# cli command: curl -O $(curl -u 'token':'' -s http://inloop-bds.test.inloop.eu/api/v1/customers/medrio/projects/mcapture/applications/ios/environments/internal-calabash/builds/ | python -c 'import sys, json; print json.load(sys.stdin)["builds"][0]["download_url"]')
 #
 ################################
 class BuildManager(object):

@@ -2,6 +2,7 @@
 
 TMP_DIR = '.capy/'
 
+
 class Color:
     ENDC = '\033[0m'
 
@@ -35,6 +36,7 @@ def merge(user, default):
             else:
                 user[k] = merge(user[k], v)
     return user
+
 
 def get(conf, prop, default):
     p = conf.get(prop, None)

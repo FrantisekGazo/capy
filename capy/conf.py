@@ -3,7 +3,7 @@
 from os import path
 import sys
 import yaml
-from util import merge
+from util import merge, get
 from device import DeviceManager
 from device_os import OS
 from test import TestManager
@@ -17,9 +17,9 @@ class Config:
     def __init__(self, file_name, private_file_name):
         self.data = self.load_config(file_name, private_file_name)
 
-        self.build_manager = BuildManager(self.data.get('bds', None), OS.all)
-        self.device_manager = DeviceManager(self.data.get('devices', None), OS.all)
-        self.test_manager = TestManager(self.data.get('tests', None))
+        self.build_manager = BuildManager(get(self.data, 'bds', None), OS.all)
+        self.device_manager = DeviceManager(get(self.data, 'devices', None), OS.all)
+        self.test_manager = TestManager(get(self.data, 'tests', None))
 
     def load_yaml(self, file_name, check):
         if not path.exists(file_name):
