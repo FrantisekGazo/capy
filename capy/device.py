@@ -5,7 +5,7 @@ import time
 import sys
 import subprocess
 import shutil
-from util import Color, merge, TMP_DIR
+from util import Color, merge, TMP_DIR, STDERR_LOGGER, STDOUT_LOGGER
 from device_os import OS
 
 
@@ -57,9 +57,17 @@ class BaseDevice(object):
         self.os = os
         self.name = name
         self.ENV = environ.copy()
+        self.latest_report_dir = None
 
     def call(self, cmd):
-        subprocess.call(cmd, env=self.ENV)
+        if STDOUT_LOGGER.is_used:
+            # if custom logger is used, use it too
+            main_proc = subprocess.Popen(cmd, env=self.ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            tee_proc = subprocess.Popen(['tee', '-a', STDOUT_LOGGER.file_path], stdin=main_proc.stdout, stdout=STDOUT_LOGGER, stderr=STDERR_LOGGER)
+            tee_proc.wait()
+            tee_proc.communicate()
+        else:
+            subprocess.call(cmd, env=self.ENV)
 
     def run_console(self, build):
         cmd = self.get_console_cmd(build)
@@ -83,8 +91,9 @@ class BaseDevice(object):
 
     def show_and_run(self, base_cmd, test, report):
         tmp = TMP_DIR
-        tmp_out = self.current_report_dir(tmp)
-        dir_out = self.device_reports_dir(test.output_dir)
+        timestamp = time.strftime('%Y_%m_%d-%H_%M_%S')
+        tmp_out = self.current_report_dir(parent=tmp, timestamp=timestamp)
+        dir_out = self.device_reports_dir(parent=test.output_dir)
 
         cmd = base_cmd + test.create_command(tmp_out, report)
         self.ENV = merge(test.env, self.ENV)
@@ -107,25 +116,25 @@ class BaseDevice(object):
             shutil.move(tmp_out, dir_out)
             shutil.rmtree(self.reports_dir(tmp))
 
+        self.latest_report_dir = self.current_report_dir(parent=test.output_dir, timestamp=timestamp)
+
     def show(self, line_start=''):
         return line_start + Color.LIGHT_GREEN + '%s ' % self.name + Color.YELLOW + '(%s)' % self.os + Color.ENDC
 
-    def reports_dir(self, parent=None):
-        dir = 'reports/'
-        if parent:
-            dir = path.join(parent, dir)
-            if not path.exists(dir):
-                makedirs(dir)
+    def reports_dir(self, parent):
+        dir = path.join(parent, 'reports/')
+        if not path.exists(dir):
+            makedirs(dir)
         return path.abspath(dir)
 
-    def device_reports_dir(self, parent=None):
+    def device_reports_dir(self, parent):
         dir = path.join(self.reports_dir(parent), '%s-%s/' % (self.os, self.name))
         if not path.exists(dir):
             makedirs(dir)
         return path.abspath(dir)
 
-    def current_report_dir(self, parent=None):
-        dir = path.join(self.device_reports_dir(parent), time.strftime('%Y_%m_%d-%H_%M_%S'))
+    def current_report_dir(self, parent, timestamp):
+        dir = path.join(self.device_reports_dir(parent), timestamp)
         if not path.exists(dir):
             makedirs(dir)
         return dir

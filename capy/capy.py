@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 
+import sys
 import argparse
 import xmlrpclib
 from datetime import datetime
 from conf import Config
-from util import Color
+from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, exit_error
 from test import TestAction
 
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '0.9.11'
+VERSION = '0.10.0'
 
 
 ####################################################################################################
@@ -44,6 +45,13 @@ def check_package(name, current_version):
     return msg
 
 
+def check_calabash():
+    cmds = ['calabash-android', 'cucumber']
+    for cmd in cmds:
+        if not check_cmd(cmd):
+            exit_error('Command %s was NOT found. Please make sure calabash is installed.' % cmd)
+
+
 ####################################################################################################
 # Helper methods
 ####################################################################################################
@@ -61,6 +69,8 @@ def version():
 
 
 def console(build_name, device_name):
+    check_calabash()
+
     config = get_config()
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
@@ -69,6 +79,15 @@ def console(build_name, device_name):
 
 
 def run(build_name, device_name, test_name, with_report=False):
+    check_calabash()
+
+    if with_report:
+        # use custom loggers
+        sys.stdout = STDOUT_LOGGER
+        STDOUT_LOGGER.is_used = True
+        sys.stderr = STDERR_LOGGER
+        STDERR_LOGGER.is_used = True
+
     config = get_config()
 
     # save execution start
@@ -99,10 +118,14 @@ def run(build_name, device_name, test_name, with_report=False):
     print '| Total testing time is: ', diff
     print '+-------------------------------------------------------------------------'
 
+    if with_report and device.latest_report_dir:
+        # move logs
+        STDOUT_LOGGER.move_to(device.latest_report_dir)
+        STDERR_LOGGER.move_to(device.latest_report_dir)
+
 
 def exec_action(test_action, config, build, device):
-    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (
-    test_action, device.name, build.name) + Color.ENDC
+    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (test_action, device.name, build.name) + Color.ENDC
     if test_action == TestAction.DOWNLOAD:
         config.build_manager.download(build)
     elif test_action == TestAction.INSTALL:
@@ -140,6 +163,8 @@ def list(builds=False, devices=False, tests=False):
 
 
 def download(build_name, os):
+    check_calabash()
+
     config = get_config()
     build = config.build_manager.get_build(os, build_name)
     print Color.GREEN + "Downloading build '%s' for '%s'..." % (build.name, build.os) + Color.ENDC
@@ -147,6 +172,8 @@ def download(build_name, os):
 
 
 def install(build_name, device_name):
+    check_calabash()
+
     config = get_config()
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
@@ -155,6 +182,8 @@ def install(build_name, device_name):
 
 
 def uninstall(build_name, device_name):
+    check_calabash()
+
     config = get_config()
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)

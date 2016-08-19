@@ -5,7 +5,7 @@ from os import path, makedirs
 import subprocess
 import json
 from device_os import OS
-from util import Color, TMP_DIR
+from util import Color, TMP_DIR, exit_error
 
 
 ################################
@@ -19,8 +19,7 @@ class BuildManager(object):
 
     def __init__(self, conf, os_list):
         if not conf:
-            print Color.LIGHT_RED + 'BDS configuration is missing' + Color.ENDC
-            sys.exit(1)
+            exit_error('BDS configuration is missing')
 
         conf['build_dir'] = conf.get('build_dir', path.join(TMP_DIR + 'builds/'))
         self.token = self.load(conf, 'token')
@@ -39,15 +38,24 @@ class BuildManager(object):
         print Color.BLUE + 'Downloading from url %s...' % download_url + Color.ENDC
         # download
         download_to = build.get_path()
-        r = subprocess.call(['curl', '-o', download_to, download_url])
-        if r == 0:
+
+        if path.exists(download_to):
+            print Color.BLUE + 'Removing previous %s...' % download_to + Color.ENDC
+            subprocess.call(['rm', download_to])
+
+        # execute download
+        download_proc = subprocess.Popen(['curl', '-o', download_to, download_url], stdout=sys.stdout, stderr=sys.stderr)
+        download_proc.wait()
+        download_proc.communicate()
+
+        if path.exists(download_to):
             print Color.BLUE + 'Downloaded to ' + download_to + Color.ENDC
             if build.os == OS.Android:
+                # resign build for Android
                 print Color.BLUE + 'Resigning apk...' + Color.ENDC
                 subprocess.call(['calabash-android', 'resign', download_to])
         else:
-            print Color.LIGHT_RED + 'BDS build could not be downloaded' + Color.ENDC
-            sys.exit(1)
+            exit_error('BDS build could not be downloaded')
 
     # public
     def check_and_get_build(self, os, build_name):
@@ -69,8 +77,7 @@ class BuildManager(object):
         if build:
             return build
         else:
-            print Color.LIGHT_RED + "Build with name '%s' does not exists for '%s'!" % (build_name, os) + Color.ENDC
-            sys.exit(1)
+            exit_error("Build with name '%s' does not exists for '%s'!" % (build_name, os))
 
     # private
     def get_default_build(self, os):
@@ -78,15 +85,13 @@ class BuildManager(object):
             if build.is_default:
                 return build
 
-        print Color.LIGHT_RED + "'%s' has no default build! Please add 'default: true' to one of the builds." % os + Color.ENDC
-        sys.exit(1)
+        exit_error("'%s' has no default build! Please add 'default: true' to one of the builds." % os)
 
     # private
     def load(self, conf, prop):
         p = conf.get(prop, None)
         if not p:
-            print Color.LIGHT_RED + "BDS configuration is missing a '%s'" % prop + Color.ENDC
-            sys.exit(1)
+            exit_error("BDS configuration is missing a '%s'" % prop)
         return p
 
     # private
@@ -98,8 +103,7 @@ class BuildManager(object):
         default_build_name = os_conf.get('default', None)
         default_build_found = False
         if not default_build_name:
-            print Color.LIGHT_RED + "BDS is missing default build for '%s'" % os + Color.ENDC
-            sys.exit(1)
+            exit_error("BDS is missing default build for '%s'" % os)
 
         for name, info in os_conf.iteritems():
             if name == 'default':
@@ -113,8 +117,7 @@ class BuildManager(object):
             builds[name] = build
 
         if not default_build_found:
-            print Color.LIGHT_RED + "'%s' default build '%s' was not found" % (os, default_build_name) + Color.ENDC
-            sys.exit(1)
+            exit_error("'%s' default build '%s' was not found" % (os, default_build_name))
 
         self.builds[os] = builds
 
@@ -138,10 +141,9 @@ class BuildManager(object):
         proc.wait()
         response = proc.communicate()[0]
         try:
-            return json.loads(response)['builds'][0]
+            return json.loads(response)['builds'][0] # get 1st build
         except:
-            print Color.LIGHT_RED + 'No BDS build was found' + Color.ENDC
-            sys.exit(1)
+            exit_error('No BDS build was found')
 
 
 class Build(object):
@@ -151,8 +153,7 @@ class Build(object):
         self.is_default = False
         self.app_id = info.get('app_id', None)
         if not self.app_id:
-            print Color.LIGHT_RED + "BDS Build '%s' must specify an 'app_id'" % self.name + Color.ENDC
-            sys.exit(1)
+            exit_error("BDS Build '%s' must specify an 'app_id'" % self.name)
         self.env = info.get('env', None)
         self.conf = info.get('conf', None)
         self.build_dir = info['build_dir']
