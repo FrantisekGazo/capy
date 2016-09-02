@@ -15,7 +15,7 @@ from util import Color, TMP_DIR, exit_error, get
 #
 ################################
 class BuildManager(object):
-    API_ENDPOINT = 'http://inloop-bds.test.inloop.eu/api/v1'
+    API_ENDPOINT = 'https://inloop-bds.inloop.eu/api/v1'
 
     def __init__(self, conf, os_list):
         if not conf:
