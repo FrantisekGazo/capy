@@ -2,9 +2,11 @@
 
 ## Installation
 
-`brew install python`
+Install `brew` by `https://git.inloop.eu/medrio/medrio_at_mcapture/merge_requests/55` (if not already installed)
 
-`pip install capy` (optionally you need to run `pip install pyyaml` if it fails)
+Install `Python` by  `brew install python`
+
+And finally install this tool by `pip install capy` (optionally you need to run `pip install pyyaml` if it fails)
 
 ## Usage
 
