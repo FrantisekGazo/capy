@@ -22,13 +22,19 @@ class BuildManager(object):
             exit_error('BDS configuration is missing')
 
         conf['build_dir'] = conf.get('build_dir', path.join(TMP_DIR + 'builds/'))
-        self.token = self.load(conf, 'token')
+        self.token = get(conf, 'token', None) # don't check token until it's needed
         self.customer = self.load(conf, 'customer')
         self.project = self.load(conf, 'project')
 
         self.builds = {}
         for os in os_list:
             self.load_builds(conf, os=os)
+
+    # private
+    def get_token(self):
+        if not self.token:
+            exit_error("BDS configuration is missing a 'token'")
+        return self.token
 
     # public
     def download(self, build):
@@ -133,7 +139,7 @@ class BuildManager(object):
 
     # private
     def get_latest_bds_build(self, build):
-        token = "%s:\'\'" % self.token
+        token = "%s:\'\'" % self.get_token()
 
         url = '{api}/customers/{customer}/projects/{project}/applications/{os}/'.format(
                 api=self.API_ENDPOINT, customer=self.customer, project=self.project, os=build.os
