@@ -170,6 +170,9 @@ class Build(object):
         self.app_id = info.get('app_id', None)
         if not self.app_id:
             exit_error("BDS Build '%s' must specify an 'app_id'" % self.name)
+        self.csid = info.get('csid', None)
+        if os == OS.iOS and not self.csid:
+            exit_error("BDS iOS Build '%s' must specify a 'csid' (Code Sign Identity)" % self.name)
         self.env = info.get('env', None)
         self.conf = info.get('conf', None)
         self.build_dir = info['build_dir']
@@ -196,4 +199,6 @@ class Build(object):
             s += '\n' + line_start + Color.YELLOW + '  - env: ' + Color.ENDC + self.env
         if self.conf:
             s += '\n' + line_start + Color.YELLOW + '  - conf: ' + Color.ENDC + self.conf
+        if self.csid:
+            s += '\n' + line_start + Color.YELLOW + '  - csid: ' + Color.ENDC + self.csid
         return s

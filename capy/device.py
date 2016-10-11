@@ -150,10 +150,12 @@ class IosDevice(BaseDevice):
 
     def get_console_cmd(self, build):
         self.ENV["BUNDLE_ID"] = build.app_id
+        self.ENV["CODE_SIGN_IDENTITY"] = build.csid
         return ['calabash-ios', 'console', '-p', 'ios']
 
     def get_run_cmd(self, build):
         self.ENV["BUNDLE_ID"] = build.app_id
+        self.ENV["CODE_SIGN_IDENTITY"] = build.csid
         return ['cucumber', '-p', 'ios']
 
     def show(self, line_start=''):
