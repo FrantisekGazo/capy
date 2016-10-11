@@ -37,12 +37,12 @@ bds:
       app_id: my.app.bundle.id
       env: internal-calabash
       conf: unstable
-      csid: iPhone Developer: Your Name (ABCDEF1234)
+      csid: "iPhone Developer: Your Name (ABCDEF1234)"
     inRc:
       app_id: my.app.bundle.id
       env: internal-calabash
       conf: rc
-      csid: iPhone Developer: Your Name (ABCDEF1234)
+      csid: "iPhone Developer: Your Name (ABCDEF1234)"
 
 # List of supported devices
 devices:
