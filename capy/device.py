@@ -177,6 +177,8 @@ class IosDevice(BaseDevice):
     def uninstall(self, build):
         self.check_cli_tool()
         self.call([self.CLI_TOOL, '-U', build.app_id])
+        if build.csid:
+            self.call([self.CLI_TOOL, '-U', 'com.apple.test.DeviceAgent-Runner'])
 
 
 ################################
