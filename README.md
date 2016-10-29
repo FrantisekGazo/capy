@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install `brew` by `https://git.inloop.eu/medrio/medrio_at_mcapture/merge_requests/55` (if not already installed)
+Install `brew` by `ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"` (if not already installed)
 
 Install `Python` by  `brew install python`
 
