@@ -7,6 +7,7 @@ from datetime import datetime
 from conf import Config
 from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, exit_error
 from test import TestAction
+from cmd import DeviceRunner
 
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
@@ -75,7 +76,7 @@ def console(build_name, device_name):
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
     print Color.GREEN + "Opening console for device '%s' with '%s'..." % (device.name, build.name) + Color.ENDC
-    device.run_console(build)
+    DeviceRunner(device).open_console(build)
 
 
 def run(build_name, device_name, test_name, with_report=False):
@@ -103,9 +104,11 @@ def run(build_name, device_name, test_name, with_report=False):
 
     # just to make sure build is available (this will download it if not)
     build = config.build_manager.check_and_get_build(device.os, build_name)
+    version_names = config.build_manager.get_version_names()
 
     print Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC
-    device.run(build, test, report=with_report)
+    runner = DeviceRunner(device)
+    runner.run_test(test, build, version_names, report=with_report)
 
     if test.after:
         for action in test.after:
@@ -118,10 +121,10 @@ def run(build_name, device_name, test_name, with_report=False):
     print '| Total testing time is: ', diff
     print '+-------------------------------------------------------------------------'
 
-    if with_report and device.latest_report_dir:
+    if with_report and runner.latest_report_dir:
         # move logs
-        STDOUT_LOGGER.move_to(device.latest_report_dir)
-        STDERR_LOGGER.move_to(device.latest_report_dir)
+        STDOUT_LOGGER.move_to(runner.latest_report_dir)
+        STDERR_LOGGER.move_to(runner.latest_report_dir)
 
 
 def exec_action(test_action, config, build, device):
@@ -129,9 +132,9 @@ def exec_action(test_action, config, build, device):
     if test_action == TestAction.DOWNLOAD:
         config.build_manager.download(build)
     elif test_action == TestAction.INSTALL:
-        device.install(build)
+        DeviceRunner(device).install(build)
     elif test_action == TestAction.UNINSTALL:
-        device.uninstall(build)
+        DeviceRunner(device).uninstall(build)
 
 
 def list(builds=False, devices=False, tests=False):
@@ -178,7 +181,7 @@ def install(build_name, device_name):
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
     print Color.GREEN + "Installing '%s' to device '%s'..." % (build.name, device.name) + Color.ENDC
-    device.install(build)
+    DeviceRunner(device).install(build)
 
 
 def uninstall(build_name, device_name):
@@ -188,7 +191,7 @@ def uninstall(build_name, device_name):
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
     print Color.GREEN + "Uninstalling '%s' from device '%s'..." % (build.name, device.name) + Color.ENDC
-    device.uninstall(build)
+    DeviceRunner(device).uninstall(build)
 
 
 ###########################################################

@@ -64,6 +64,9 @@ class Test:
         self.after = get(conf, 'after', [])
         TestAction.validate(self.after)
 
+    def get_env(self):
+        return self.env
+
     def show(self, line_start=''):
         s = line_start + Color.LIGHT_GREEN + self.name + ":\n"
         # show run
@@ -84,20 +87,6 @@ class Test:
             s += line_start + Color.YELLOW + '  env: ' + Color.ENDC + str(self.env)
 
         return s
-
-    def create_command(self, output_dir_path, report=False):
-        command = self.run.split(' ')
-
-        if report:
-            report_file = path.join(output_dir_path, 'report.html')
-            command.append('--format')
-            command.append('html')
-            command.append('--out')
-            command.append(report_file)
-            command.append('--format')
-            command.append('pretty')
-
-        return command
 
 
 ################################################################

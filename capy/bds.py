@@ -22,7 +22,7 @@ class BuildManager(object):
             exit_error('BDS configuration is missing')
 
         conf['build_dir'] = conf.get('build_dir', path.join(TMP_DIR + 'builds/'))
-        self.token = get(conf, 'token', None) # don't check token until it's needed
+        self.token = get(conf, 'token', None)  # don't check token until it's needed
         self.customer = self.load(conf, 'customer')
         self.project = self.load(conf, 'project')
 
@@ -37,7 +37,7 @@ class BuildManager(object):
         return self.token
 
     # public
-    def download(self, build):
+    def download(self, build): # TODO: support also download of specific version
         # load build from BDS
         bds_build = self.get_latest_bds_build(build)
         download_url = bds_build['download_url']
@@ -50,7 +50,9 @@ class BuildManager(object):
             subprocess.call(['rm', download_to])
 
         # execute download
-        download_proc = subprocess.Popen(['curl', '-o', download_to, download_url], stdout=sys.stdout, stderr=sys.stderr)
+        download_proc = subprocess.Popen(
+                ['curl', '-o', download_to, download_url], stdout=sys.stdout, stderr=sys.stderr
+        )
         download_proc.wait()
         download_proc.communicate()
 
@@ -93,6 +95,9 @@ class BuildManager(object):
         else:
             exit_error("No %s builds were found!" % os)
 
+    def get_version_names(self):
+        return ['1.0.0', '1.1.0', '1.2.0', '2.0.0']  # FIXME: show real version list form BDS
+
     # private
     def get_default_build(self, os):
         for name, build in self.get_builds(os).iteritems():
@@ -127,6 +132,9 @@ class BuildManager(object):
 
             info['build_dir'] = info.get('build_dir', conf['build_dir'])
             build = Build(os, name, info)
+            if not self.has_valid_version(build):
+                exit_error("'%s' build '%s' has invalid version name." % (os, build.name))
+
             if name == default_build_name:
                 build.is_default = True
                 default_build_found = True
@@ -136,6 +144,10 @@ class BuildManager(object):
             exit_error("'%s' default build '%s' was not found" % (os, default_build_name))
 
         self.builds[os] = builds
+
+    # private
+    def has_valid_version(self, build):
+        return not build.version or build.version in self.get_version_names()
 
     # private
     def get_latest_bds_build(self, build):
@@ -157,7 +169,7 @@ class BuildManager(object):
         proc.wait()
         response = proc.communicate()[0]
         try:
-            return json.loads(response)['builds'][0] # get 1st build
+            return json.loads(response)['builds'][0]  # get 1st build
         except:
             exit_error('No BDS build was found')
 
@@ -175,6 +187,7 @@ class Build(object):
             exit_error("BDS iOS Build '%s' must specify a 'csid' (Code Sign Identity)" % self.name)
         self.env = info.get('env', None)
         self.conf = info.get('conf', None)
+        self.version = info.get('version', None)
         self.build_dir = info['build_dir']
         # prepare path
         extension = '.apk' if os == OS.Android else '.ipa'
@@ -199,6 +212,8 @@ class Build(object):
             s += '\n' + line_start + Color.YELLOW + '  - env: ' + Color.ENDC + self.env
         if self.conf:
             s += '\n' + line_start + Color.YELLOW + '  - conf: ' + Color.ENDC + self.conf
+        if self.version:
+            s += '\n' + line_start + Color.YELLOW + '  - version: ' + Color.ENDC + self.version
         if self.csid:
             s += '\n' + line_start + Color.YELLOW + '  - csid: ' + Color.ENDC + self.csid
         return s
