@@ -129,8 +129,8 @@ class DeviceRunner(object):
 # Version Command Builder
 ################################
 class VersionCmdBuilder(object):
-    MIN_PREFIX = '-v-min-'
-    MAX_PREFIX = '-v-max-'
+    MIN_PREFIX = '-min-v'
+    MAX_PREFIX = '-max-v'
 
     @classmethod
     def build_cmd(cls, device, build, version_names):
