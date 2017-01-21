@@ -141,6 +141,7 @@ class VersionCmdBuilder(object):
 
         index = version_names.index(build.version)
 
+        # use negation via '~' in order to support tests without min/max tags
         after = version_names[index + 1:]
         min_cmd = ','.join(['~@' + device.get_os() + cls.MIN_PREFIX + tag for tag in after])
 

@@ -104,7 +104,7 @@ def run(build_name, device_name, test_name, with_report=False):
 
     # just to make sure build is available (this will download it if not)
     build = config.build_manager.check_and_get_build(device.os, build_name)
-    version_names = config.build_manager.get_version_names()
+    version_names = config.build_manager.get_version_names(build)
 
     print Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC
     runner = DeviceRunner(device)
