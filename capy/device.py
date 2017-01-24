@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 
-from os import environ, makedirs, path
-import time
-import sys
-import subprocess
-import shutil
-from util import Color, merge, TMP_DIR, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, exit_error
+from util import Color, exit_error
 from device_os import OS
 
 
@@ -50,91 +45,37 @@ class DeviceManager(object):
 # Base Device
 ################################
 class BaseDevice(object):
-    def __init__(self, os, name):
+    def __init__(self, os, name, env={}):
         self.os = os
         self.name = name
-        self.ENV = environ.copy()
-        self.latest_report_dir = None
+        self.env = env
 
-    def call(self, cmd):
-        if STDOUT_LOGGER.is_used:
-            # if custom logger is used, use it too
-            main_proc = subprocess.Popen(cmd, env=self.ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            tee_proc = subprocess.Popen(['tee', '-a', STDOUT_LOGGER.file_path], stdin=main_proc.stdout, stdout=STDOUT_LOGGER, stderr=STDERR_LOGGER)
-            tee_proc.wait()
-            tee_proc.communicate()
-        else:
-            subprocess.call(cmd, env=self.ENV)
+    def get_os(self):
+        return self.os
 
-    def run_console(self, build):
-        cmd = self.get_console_cmd(build)
-        self.call(cmd)
+    def get_env(self):
+        return self.env
+
+    def get_cli_tools(self):
+        return []  # implement
+
+    def get_install_cmds(self, build):
+        return []  # implement
+
+    def get_uninstall_cmds(self, build):
+        return []  # implement
 
     def get_console_cmd(self, build):
         return []  # implement
 
-    def run(self, build, test, report=False):
-        cmd = self.get_run_cmd(build)
-        self.show_and_run(cmd, test, report)
-
     def get_run_cmd(self, build):
         return []  # implement
 
-    def install(self, build):
-        pass  # implement
-
-    def uninstall(self, build):
-        pass  # implement
-
-    def show_and_run(self, base_cmd, test, report):
-        tmp = TMP_DIR
-        timestamp = time.strftime('%Y_%m_%d-%H_%M_%S')
-        tmp_out = self.current_report_dir(parent=tmp, timestamp=timestamp)
-        dir_out = self.device_reports_dir(parent=test.output_dir)
-
-        cmd = base_cmd + test.create_command(tmp_out, report)
-        self.ENV = merge(test.env, self.ENV)
-        # show commands
-        print '--------------------------------------------------------------------------'
-        print '| Commands: '
-        print '|'
-        print '|', " ".join(cmd)
-        print '|'
-        print '| NOTE: output files will be moved to:', dir_out
-        print '|'
-        print '--------------------------------------------------------------------------'
-
-        # run command
-        self.ENV["SCREENSHOT_PATH"] = tmp_out + '/'  # has to end with '/'
-        self.call(cmd)
-
-        # move files if necessary
-        if tmp != test.output_dir:
-            shutil.move(tmp_out, dir_out)
-            shutil.rmtree(self.reports_dir(tmp))
-
-        self.latest_report_dir = self.current_report_dir(parent=test.output_dir, timestamp=timestamp)
+    def get_build_env(self, build):
+        return {}  # implement
 
     def show(self, line_start=''):
         return line_start + Color.LIGHT_GREEN + '%s ' % self.name + Color.YELLOW + '(%s)' % self.os + Color.ENDC
-
-    def reports_dir(self, parent):
-        dir = path.join(parent, 'reports/')
-        if not path.exists(dir):
-            makedirs(dir)
-        return path.abspath(dir)
-
-    def device_reports_dir(self, parent):
-        dir = path.join(self.reports_dir(parent), '%s-%s/' % (self.os, self.name))
-        if not path.exists(dir):
-            makedirs(dir)
-        return path.abspath(dir)
-
-    def current_report_dir(self, parent, timestamp):
-        dir = path.join(self.device_reports_dir(parent), timestamp)
-        if not path.exists(dir):
-            makedirs(dir)
-        return dir
 
 
 ################################
@@ -144,41 +85,50 @@ class IosDevice(BaseDevice):
     CLI_TOOL = 'ideviceinstaller'
 
     def __init__(self, name, uuid, ip):
-        super(IosDevice, self).__init__(OS.iOS, name)
-        self.ENV["DEVICE_TARGET"] = uuid
-        self.ENV["DEVICE_ENDPOINT"] = 'http://%s:37265' % ip
+        env = {
+            "DEVICE_TARGET": uuid,
+            "DEVICE_ENDPOINT": 'http://%s:37265' % ip
+        }
+        super(IosDevice, self).__init__(OS.iOS, name, env)
 
     def get_console_cmd(self, build):
-        self.ENV["BUNDLE_ID"] = build.app_id
-        self.ENV["CODE_SIGN_IDENTITY"] = build.csid
         return ['calabash-ios', 'console', '-p', 'ios']
 
     def get_run_cmd(self, build):
-        self.ENV["BUNDLE_ID"] = build.app_id
-        self.ENV["CODE_SIGN_IDENTITY"] = build.csid
         return ['cucumber', '-p', 'ios']
+
+    def get_build_env(self, build):
+        return {
+            "BUNDLE_ID": build.app_id,
+            "CODE_SIGN_IDENTITY": build.csid
+        }
+
+    def get_cli_tools(self):
+        return [self.CLI_TOOL]
+
+    def get_install_cmds(self, build):
+        return [
+            [self.CLI_TOOL, '-i', build.get_path()]
+        ]
+
+    def get_uninstall_cmds(self, build):
+        cmds = [
+            [self.CLI_TOOL, '-U', build.app_id]
+        ]
+        if build.csid:
+            cmds.append([self.CLI_TOOL, '-U', 'com.apple.test.DeviceAgent-Runner'])
+
+        return cmds
 
     def show(self, line_start=''):
         s = super(IosDevice, self).show(line_start=line_start)
-        s += '\n' + line_start + Color.YELLOW + '  - UUID: ' + Color.ENDC + '%s' % self.ENV[
-            "DEVICE_TARGET"] + Color.ENDC
-        s += '\n' + line_start + Color.YELLOW + '  - IP: ' + Color.ENDC + '%s' % self.ENV[
-            "DEVICE_ENDPOINT"] + Color.ENDC
+        s += '\n' + line_start + Color.YELLOW
+        s += '  - UUID: ' + Color.ENDC + '%s' % self.env["DEVICE_TARGET"]
+        s += Color.ENDC
+        s += '\n' + line_start + Color.YELLOW
+        s += '  - IP: ' + Color.ENDC + '%s' % self.env["DEVICE_ENDPOINT"]
+        s += Color.ENDC
         return s
-
-    def check_cli_tool(self):
-        if not check_cmd(self.CLI_TOOL):
-            self.call(['brew', 'install', self.CLI_TOOL])
-
-    def install(self, build):
-        self.check_cli_tool()
-        self.call([self.CLI_TOOL, '-i', build.get_path()])
-
-    def uninstall(self, build):
-        self.check_cli_tool()
-        self.call([self.CLI_TOOL, '-U', build.app_id])
-        if build.csid:
-            self.call([self.CLI_TOOL, '-U', 'com.apple.test.DeviceAgent-Runner'])
 
 
 ################################
@@ -196,13 +146,16 @@ class AndroidDevice(BaseDevice):
     def get_run_cmd(self, build):
         return ['calabash-android', 'run', build.get_path(), '-p', 'android']
 
-    def check_cli_tool(self):
-        if not check_cmd(self.CLI_TOOL):
-            self.call(['brew', 'install', self.CLI_TOOL])
+    def get_cli_tools(self):
+        return [self.CLI_TOOL]
 
-    def install(self, build):
-        self.call(['calabash-android', 'build', build.get_path()])  # rebuild test-server
-        self.call([self.CLI_TOOL, 'install', '-r', build.get_path()])  # install app
+    def get_install_cmds(self, build):
+        return [
+            ['calabash-android', 'build', build.get_path()],  # rebuild test-server
+            [self.CLI_TOOL, 'install', '-r', build.get_path()]  # install app
+        ]
 
-    def uninstall(self, build):
-        self.call([self.CLI_TOOL, 'uninstall', build.app_id])
+    def get_uninstall_cmds(self, build):
+        return [
+            [self.CLI_TOOL, 'uninstall', build.app_id]
+        ]
