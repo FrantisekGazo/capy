@@ -27,8 +27,7 @@ class DeviceRunner(object):
             tee_proc.wait()
             tee_proc.communicate()
         else:
-            pass
-            # FIXME subprocess.call(cmd, env=env)
+            subprocess.call(cmd, env=env)
 
     def prepare_env(self, *envs):
         base = environ.copy()
@@ -139,16 +138,16 @@ class VersionCmdBuilder(object):
         if not build.version:
             return cmd
 
-        index = version_names.index(build.version)
+        sorted_versions = sorted(version_names)
+        index = sorted_versions.index(build.version)
+        before = sorted_versions[:index]
+        after = sorted_versions[index + 1:]
 
         # use negation via '~' in order to support tests without min/max tags
-        after = version_names[index + 1:]
-        min_cmd = ','.join(['~@' + device.get_os() + cls.MIN_PREFIX + tag for tag in after])
+        min_cmd = ['--tags ~@' + device.get_os() + cls.MIN_PREFIX + tag for tag in after]
+        max_cmd = ['--tags ~@' + device.get_os() + cls.MAX_PREFIX + tag for tag in before]
 
-        before = version_names[:index]
-        max_cmd = ','.join(['~@' + device.get_os() + cls.MAX_PREFIX + tag for tag in before])
-
-        return ['--tags', min_cmd, '--tags', max_cmd]
+        return min_cmd + max_cmd
 
 
 ################################
