@@ -133,10 +133,8 @@ class VersionCmdBuilder(object):
 
     @classmethod
     def build_cmd(cls, device, build, version_names):
-        cmd = []
-
         if not build.version:
-            return cmd
+            return []
 
         sorted_versions = sorted(version_names)
         index = sorted_versions.index(build.version)
@@ -144,10 +142,14 @@ class VersionCmdBuilder(object):
         after = sorted_versions[index + 1:]
 
         # use negation via '~' in order to support tests without min/max tags
-        min_cmd = ['--tags ~@' + device.get_os() + cls.MIN_PREFIX + tag for tag in after]
-        max_cmd = ['--tags ~@' + device.get_os() + cls.MAX_PREFIX + tag for tag in before]
+        min_cmd = ['~@' + device.get_os() + cls.MIN_PREFIX + tag for tag in after]
+        max_cmd = ['~@' + device.get_os() + cls.MAX_PREFIX + tag for tag in before]
 
-        return min_cmd + max_cmd
+        cmd = []
+        for tag in min_cmd + max_cmd:
+            cmd += ['--tags', tag]
+
+        return cmd
 
 
 ################################

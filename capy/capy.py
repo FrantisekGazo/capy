@@ -12,7 +12,7 @@ from cmd import DeviceRunner
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 
 ####################################################################################################
