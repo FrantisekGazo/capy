@@ -26,6 +26,9 @@ def merge(user, default):
 
 
 def get(conf, prop, default):
+    if not conf:
+        return default
+
     p = conf.get(prop, None)
     if p:
         return p
