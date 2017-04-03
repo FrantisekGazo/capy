@@ -156,9 +156,8 @@ class AndroidDevice(BaseDevice):
         if id:
             env[self.ID_ENV_NAME] = id
         if port:
-            env[self.PORT_ENV_NAME] = str(port) # make sure it's a string
+            env[self.PORT_ENV_NAME] = str(port)  # make sure it's a string
         super(AndroidDevice, self).__init__(OS.Android, name, env)
-
 
     def get_console_cmd(self, build):
         return ['calabash-android', 'console', build.get_path(), '-p', 'android']
@@ -170,15 +169,28 @@ class AndroidDevice(BaseDevice):
         return [self.CLI_TOOL]
 
     def get_install_cmds(self, build):
-        return [
-            ['calabash-android', 'build', build.get_path()],  # rebuild test-server
-            [self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'install', '-r', build.get_path()]  # install app
-        ]
+        cmds = []
+
+        # rebuild test-server
+        cmds.append(['calabash-android', 'build', build.get_path()])
+
+        # install app
+        if self.PORT_ENV_NAME in self.env:
+            cmds.append([self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'install', '-r', build.get_path()])
+        else:
+            cmds.append([self.CLI_TOOL, 'install', '-r', build.get_path()])
+
+        return cmds
 
     def get_uninstall_cmds(self, build):
-        return [
-            [self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'uninstall', build.app_id]
-        ]
+        if self.PORT_ENV_NAME in self.env:
+            return [
+                [self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'uninstall', build.app_id]
+            ]
+        else:
+            return [
+                [self.CLI_TOOL, 'uninstall', build.app_id]
+            ]
 
     def show(self, line_start=''):
         s = super(AndroidDevice, self).show(line_start=line_start)
