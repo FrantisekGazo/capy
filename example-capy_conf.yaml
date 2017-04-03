@@ -46,10 +46,16 @@ bds:
 
 # List of supported devices
 devices:
-  # (optional) Android devices (one generic device covers all, nothing needs to be specified)
+  # (optional) Android devices
   android:
     # Device name
-    a:
+    a: # one generic device covers all, nothing needs to be specified if only 1 is connected
+    atab:
+      # (optional) Device ID
+      id: ABC123456789
+      # (optional) Device port
+      port: 34800
+
   # (optional) iOS devices (each device has to specify ID and IP address)
   ios:
     # Device name
