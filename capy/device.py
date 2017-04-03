@@ -172,12 +172,12 @@ class AndroidDevice(BaseDevice):
     def get_install_cmds(self, build):
         return [
             ['calabash-android', 'build', build.get_path()],  # rebuild test-server
-            [self.CLI_TOOL, 'install', '-r', build.get_path()]  # install app
+            [self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'install', '-r', build.get_path()]  # install app
         ]
 
     def get_uninstall_cmds(self, build):
         return [
-            [self.CLI_TOOL, 'uninstall', build.app_id]
+            [self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'uninstall', build.app_id]
         ]
 
     def show(self, line_start=''):
