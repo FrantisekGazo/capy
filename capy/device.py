@@ -120,15 +120,15 @@ class IosDevice(BaseDevice):
 
     def get_install_cmds(self, build):
         return [
-            [self.CLI_TOOL, '-i', build.get_path()]
+            [self.CLI_TOOL, '-u', self.env[self.ID_ENV_NAME], '-i', build.get_path()]
         ]
 
     def get_uninstall_cmds(self, build):
         cmds = [
-            [self.CLI_TOOL, '-U', build.app_id]
+            [self.CLI_TOOL, '-u', self.env[self.ID_ENV_NAME], '-U', build.app_id]
         ]
         if build.csid:
-            cmds.append([self.CLI_TOOL, '-U', 'com.apple.test.DeviceAgent-Runner'])
+            cmds.append([self.CLI_TOOL, '-u', self.env[self.ID_ENV_NAME], '-U', 'com.apple.test.DeviceAgent-Runner'])
 
         return cmds
 
