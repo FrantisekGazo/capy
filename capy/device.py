@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from util import Color, exit_error
+from util import Color, exit_error, get
 from device_os import OS
 
 
@@ -20,12 +20,22 @@ class DeviceManager(object):
     def load_devices(self, conf, os):
         for name, info in conf.get(os, {}).iteritems():
             if os == OS.Android:
-                self.devices[name] = AndroidDevice(name)
+                id = get(info, 'id', None)
+                port = get(info, 'port', None)
+                if id and not port:
+                    exit_error("Device '%s' is missing parameter 'port' (it is required if 'id' is specified)" % name)
+
+                self.devices[name] = AndroidDevice(name, id, port)
             elif os == OS.iOS:
-                self.validate_device(name, info, 'uuid')
+                # change uuid to id (to ensure compatibility with older versions)
+                if 'uuid' in info:
+                    info['id'] = info['uuid']
+                    del info['uuid']
+
+                self.validate_device(name, info, 'id')
                 self.validate_device(name, info, 'ip')
 
-                self.devices[name] = IosDevice(name, info['uuid'], info['ip'])
+                self.devices[name] = IosDevice(name, info['id'], info['ip'])
 
     # private
     def validate_device(self, name, params, param_name):
@@ -83,11 +93,13 @@ class BaseDevice(object):
 ################################
 class IosDevice(BaseDevice):
     CLI_TOOL = 'ideviceinstaller'
+    ID_ENV_NAME = 'DEVICE_TARGET'
+    IP_ENV_NAME = 'DEVICE_ENDPOINT'
 
-    def __init__(self, name, uuid, ip):
+    def __init__(self, name, id, ip):
         env = {
-            "DEVICE_TARGET": uuid,
-            "DEVICE_ENDPOINT": 'http://%s:37265' % ip
+            self.ID_ENV_NAME: id,
+            self.IP_ENV_NAME: 'http://%s:37265' % ip
         }
         super(IosDevice, self).__init__(OS.iOS, name, env)
 
@@ -123,10 +135,10 @@ class IosDevice(BaseDevice):
     def show(self, line_start=''):
         s = super(IosDevice, self).show(line_start=line_start)
         s += '\n' + line_start + Color.YELLOW
-        s += '  - UUID: ' + Color.ENDC + '%s' % self.env["DEVICE_TARGET"]
+        s += '  - ID: ' + Color.ENDC + '%s' % self.env[self.ID_ENV_NAME]
         s += Color.ENDC
         s += '\n' + line_start + Color.YELLOW
-        s += '  - IP: ' + Color.ENDC + '%s' % self.env["DEVICE_ENDPOINT"]
+        s += '  - IP: ' + Color.ENDC + '%s' % self.env[self.IP_ENV_NAME]
         s += Color.ENDC
         return s
 
@@ -136,9 +148,17 @@ class IosDevice(BaseDevice):
 ################################
 class AndroidDevice(BaseDevice):
     CLI_TOOL = 'adb'
+    ID_ENV_NAME = 'ADB_DEVICE_ARG'
+    PORT_ENV_NAME = 'TEST_SERVER_PORT'
 
-    def __init__(self, name):
-        super(AndroidDevice, self).__init__(OS.Android, name)
+    def __init__(self, name, id=None, port=None):
+        env = {}
+        if id:
+            env[self.ID_ENV_NAME] = id
+        if port:
+            env[self.PORT_ENV_NAME] = str(port) # make sure it's a string
+        super(AndroidDevice, self).__init__(OS.Android, name, env)
+
 
     def get_console_cmd(self, build):
         return ['calabash-android', 'console', build.get_path(), '-p', 'android']
@@ -152,10 +172,22 @@ class AndroidDevice(BaseDevice):
     def get_install_cmds(self, build):
         return [
             ['calabash-android', 'build', build.get_path()],  # rebuild test-server
-            [self.CLI_TOOL, 'install', '-r', build.get_path()]  # install app
+            [self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'install', '-r', build.get_path()]  # install app
         ]
 
     def get_uninstall_cmds(self, build):
         return [
-            [self.CLI_TOOL, 'uninstall', build.app_id]
+            [self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'uninstall', build.app_id]
         ]
+
+    def show(self, line_start=''):
+        s = super(AndroidDevice, self).show(line_start=line_start)
+        if self.ID_ENV_NAME in self.env:
+            s += '\n' + line_start + Color.YELLOW
+            s += '  - ID: ' + Color.ENDC + '%s' % self.env[self.ID_ENV_NAME]
+            s += Color.ENDC
+        if self.PORT_ENV_NAME in self.env:
+            s += '\n' + line_start + Color.YELLOW
+            s += '  - PORT: ' + Color.ENDC + '%s' % self.env[self.PORT_ENV_NAME]
+            s += Color.ENDC
+        return s

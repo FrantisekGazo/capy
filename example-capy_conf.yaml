@@ -46,20 +46,26 @@ bds:
 
 # List of supported devices
 devices:
-  # (optional) Android devices (one generic device covers all, nothing needs to be specified)
+  # (optional) Android devices
   android:
     # Device name
-    a:
-  # (optional) iOS devices (each device has to specify UUID and IP address)
+    a: # one generic device covers all, nothing needs to be specified if only 1 is connected
+    atab:
+      # (optional) Device ID
+      id: ABC123456789
+      # (optional) Device port
+      port: 34800
+
+  # (optional) iOS devices (each device has to specify ID and IP address)
   ios:
     # Device name
     ipad1:
-      # (required) Device UUID
-      uuid: 123456789123456789123456789
+      # (required) Device ID
+      id: 123456789123456789123456789
       # (required) Device IP address
       ip: 10.0.0.1
     ipad2:
-      uuid: 987654321987654321987654321
+      id: 987654321987654321987654321
       ip: 10.0.0.2
 
 # List of supported tests (each test has to specify command that will be executed)
