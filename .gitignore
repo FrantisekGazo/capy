@@ -10,12 +10,13 @@
 # iOS
 ios-deploy
 
-# ignore reports
-reports/
-
-# ignore config
+# capy test files
 capy_conf.yaml
 capy_private.yaml
+.capy/
+builds/
+reports/
+test_servers/
 
 # distribution
 dist
