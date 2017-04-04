@@ -14,6 +14,8 @@ from bds import BuildManager
 # Setup
 ################################
 class Config:
+    INCLUDE = 'include'
+
     def __init__(self, file_name, private_file_name):
         self.data = self.load_config(file_name, private_file_name)
 
@@ -37,10 +39,25 @@ class Config:
 
     def load_config(self, file_name, private_file_name):
         data = self.load_yaml(file_name, check=True)
+        data = self.apply_includes(data)
         private_data = self.load_yaml(private_file_name, check=False)
+        private_data = self.apply_includes(private_data)
 
         if private_data:
             private_data = merge(private_data, data)
             return private_data
         else:
             return data
+
+    def apply_includes(self, data):
+        result = {}
+
+        for key, value in data.iteritems():
+            if self.INCLUDE in value and value[self.INCLUDE] is not None:
+                included_value = self.load_yaml(value[self.INCLUDE], True)
+                result[key] = merge(included_value, value)
+            else:
+                result[key] = value
+
+        return result
+
