@@ -4,7 +4,7 @@ import re
 import sys
 import subprocess
 import shutil
-from os import makedirs, path
+from os import makedirs, path, rename
 
 ####################################################################################################
 # Temporary directory for all files
@@ -73,15 +73,25 @@ def exit_error(msg):
 # Custom logger
 ####################################################################################################
 class Logger(object):
-    def __init__(self, file_name, pipe=None):
+    def __init__(self, base_file_name, pipe=None):
         if not path.exists(TMP_DIR):
             makedirs(TMP_DIR)
-        self.file_path = path.join(TMP_DIR, file_name)
+        self.base_file_name = base_file_name
         self.pipe = pipe
+        self.file_name = None
+        self.file_path = None
         self.is_used = False
+
+    def start_for_device(self, device):
+        self.file_name = '{d}_{b}'.format(d=device.name, b=self.base_file_name)
+        self.file_path = path.join(TMP_DIR, self.file_name)
+        self.is_used = True
         # make sure log file exists and is empty
         with open(self.file_path, 'w') as log_file:
             log_file.write('')
+
+    def stop(self):
+        self.is_used = False
 
     def write(self, message):
         if self.pipe:
@@ -102,6 +112,7 @@ class Logger(object):
 
     def move_to(self, dst):
         shutil.move(self.file_path, dst)
+        rename(path.join(dst, self.file_name), path.join(dst, self.base_file_name))
 
 
 STDOUT_LOGGER = Logger('stdout.log', sys.stdout)

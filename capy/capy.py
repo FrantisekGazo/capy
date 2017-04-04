@@ -12,7 +12,7 @@ from cmd import DeviceRunner
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.0.5'
+VERSION = '1.0.6'
 
 
 ####################################################################################################
@@ -82,21 +82,21 @@ def console(build_name, device_name):
 def run(build_name, device_name, test_name, with_report=False):
     check_calabash()
 
-    if with_report:
-        # use custom loggers
-        sys.stdout = STDOUT_LOGGER
-        STDOUT_LOGGER.is_used = True
-        sys.stderr = STDERR_LOGGER
-        STDERR_LOGGER.is_used = True
-
-    config = get_config()
-
     # save execution start
     start_time = datetime.now().replace(microsecond=0)
+
+    config = get_config()
 
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.get_build(device.os, build_name)
     test = config.test_manager.get_test(test_name)
+
+    if with_report:
+        # use custom loggers
+        sys.stdout = STDOUT_LOGGER
+        STDOUT_LOGGER.start_for_device(device)
+        sys.stderr = STDERR_LOGGER
+        STDERR_LOGGER.start_for_device(device)
 
     if test.before:
         for action in test.before:
@@ -124,7 +124,9 @@ def run(build_name, device_name, test_name, with_report=False):
     if with_report and runner.latest_report_dir:
         # move logs
         STDOUT_LOGGER.move_to(runner.latest_report_dir)
+        STDERR_LOGGER.stop()
         STDERR_LOGGER.move_to(runner.latest_report_dir)
+        STDERR_LOGGER.stop()
 
 
 def exec_action(test_action, config, build, device):
