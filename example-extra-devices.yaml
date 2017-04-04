@@ -1,0 +1,9 @@
+android:
+  atab:
+    id: GFCJ67GH5
+    port: 34803
+
+ios:
+  ipad3:
+    id: 987654321987654321987654321
+    ip: 10.0.0.3

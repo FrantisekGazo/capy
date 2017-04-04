@@ -46,6 +46,10 @@ bds:
 
 # List of supported devices
 devices:
+  # (optional) Path to a file with devices
+  # Specified file will override devices in this file if some collisions occur
+  include: example-extra-devices.yaml
+
   # (optional) Android devices
   android:
     # Device name
