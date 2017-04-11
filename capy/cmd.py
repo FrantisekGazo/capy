@@ -101,7 +101,6 @@ class DeviceRunner(object):
         # move files if necessary
         if tmp != test.output_dir:
             shutil.move(tmp_out, real_out)
-            shutil.rmtree(self.get_reports_dir(tmp))
 
         self.latest_report_dir = self.get_current_report_dir(parent=test.output_dir, timestamp=timestamp)
 
