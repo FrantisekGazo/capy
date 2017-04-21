@@ -12,7 +12,7 @@ from cmd import DeviceRunner
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.0.7'
+VERSION = '1.0.8'
 
 
 ####################################################################################################
@@ -104,11 +104,11 @@ def run(build_name, device_name, test_name, with_report=False):
 
     # just to make sure build is available (this will download it if not)
     build = config.build_manager.check_and_get_build(device.os, build_name)
-    version_names = config.build_manager.get_version_names(build)
+    version_names_getter = lambda: config.build_manager.get_version_names(build)
 
     print Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC
     runner = DeviceRunner(device)
-    runner.run_test(test, build, version_names, report=with_report)
+    runner.run_test(test, build, version_names_getter, report=with_report)
 
     if test.after:
         for action in test.after:

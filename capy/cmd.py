@@ -63,7 +63,7 @@ class DeviceRunner(object):
         )
         self.call(cmd, env)
 
-    def run_test(self, test, build, version_names, report=False):
+    def run_test(self, test, build, version_names_getter, report=False):
         timestamp = time.strftime('%Y_%m_%d-%H_%M_%S')
         tmp = TMP_DIR
         tmp_out = self.get_current_report_dir(parent=tmp, timestamp=timestamp)
@@ -72,7 +72,7 @@ class DeviceRunner(object):
         # prepare command
         base_cmd = self.device.get_run_cmd(build)
         test_cmd = TestCmdBuilder.build_cmd(test, tmp_out, report)
-        version_tags = VersionCmdBuilder.build_cmd(self.device, build, version_names)
+        version_tags = VersionCmdBuilder.build_cmd(self.device, build, version_names_getter)
         cmd = base_cmd + test_cmd + version_tags
 
         # prepare env
@@ -131,11 +131,11 @@ class VersionCmdBuilder(object):
     MAX_PREFIX = '-max-v'
 
     @classmethod
-    def build_cmd(cls, device, build, version_names):
+    def build_cmd(cls, device, build, version_names_getter):
         if not build.version:
             return []
 
-        sorted_versions = sorted(version_names)
+        sorted_versions = sorted(version_names_getter())
         index = sorted_versions.index(build.version)
         before = sorted_versions[:index]
         after = sorted_versions[index + 1:]
