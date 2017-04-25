@@ -154,7 +154,7 @@ class AndroidDevice(BaseDevice):
     def __init__(self, name, id=None, port=None):
         env = {}
         if id:
-            env[self.ID_ENV_NAME] = id
+            env[self.ID_ENV_NAME] = str(id)
         if port:
             env[self.PORT_ENV_NAME] = str(port)  # make sure it's a string
         super(AndroidDevice, self).__init__(OS.Android, name, env)
