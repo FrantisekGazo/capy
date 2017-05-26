@@ -2,6 +2,7 @@
 
 from util import Color, exit_error, get
 from device_os import OS
+import os
 
 
 ################################
@@ -171,16 +172,30 @@ class AndroidDevice(BaseDevice):
     def get_install_cmds(self, build):
         cmds = []
 
+        # check Android version
+        version = self._get_device_android_version()
+        # since 6.0 (API 23) you need '-g' because of runtime permissions
+        apk_param_name = '-r' if version < 23 else '-g'
+
         # rebuild test-server
         cmds.append(['calabash-android', 'build', build.get_path()])
 
         # install app
         if self.PORT_ENV_NAME in self.env:
-            cmds.append([self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'install', '-r', build.get_path()])
+            cmds.append([self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'install', apk_param_name, build.get_path()])
         else:
-            cmds.append([self.CLI_TOOL, 'install', '-r', build.get_path()])
+            cmds.append([self.CLI_TOOL, 'install', apk_param_name, build.get_path()])
 
         return cmds
+
+    def _get_device_android_version(self):
+        if self.PORT_ENV_NAME in self.env:
+            cmd = "{a} -s {n} shell getprop ro.build.version.sdk".format(a= self.CLI_TOOL, n=self.env[self.ID_ENV_NAME])
+        else:
+            cmd = "{a} shell getprop ro.build.version.sdk".format(a= self.CLI_TOOL)
+
+        version_str = os.popen(cmd).read()
+        return int(version_str)
 
     def get_uninstall_cmds(self, build):
         if self.PORT_ENV_NAME in self.env:
