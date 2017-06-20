@@ -56,10 +56,13 @@ class DeviceManager(object):
 # Base Device
 ################################
 class BaseDevice(object):
+    DEVICE_NAME = 'CAPY_DEVICE_NAME'
+
     def __init__(self, os, name, env={}):
         self.os = os
         self.name = name
         self.env = env
+        self.env[self.DEVICE_NAME] = name
 
     def get_os(self):
         return self.os
