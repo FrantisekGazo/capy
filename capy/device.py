@@ -175,27 +175,34 @@ class AndroidDevice(BaseDevice):
     def get_install_cmds(self, build):
         cmds = []
 
-        # check Android version
-        version = self._get_device_android_version()
-        # since 6.0 (API 23) you need '-g' because of runtime permissions
-        apk_param_name = '-r' if version < 23 else '-g'
-
         # rebuild test-server
         cmds.append(['calabash-android', 'build', build.get_path()])
 
         # install app
+        install_cmd = [self.CLI_TOOL]
         if self.PORT_ENV_NAME in self.env:
-            cmds.append([self.CLI_TOOL, '-s', self.env[self.ID_ENV_NAME], 'install', apk_param_name, build.get_path()])
+            install_cmd.append('-s')
+            install_cmd.append(self.env[self.ID_ENV_NAME])
+        install_cmd.append('install')
+
+        android_version = self._get_device_android_version()
+        if android_version < 23:
+            install_cmd.append('-r')
         else:
-            cmds.append([self.CLI_TOOL, 'install', apk_param_name, build.get_path()])
+            # since 6.0 (API 23) you need '-g' in order to grant runtime permissions
+            install_cmd.append('-g')
+            install_cmd.append('-r')
+
+        install_cmd.append(build.get_path())
+        cmds.append(install_cmd)
 
         return cmds
 
     def _get_device_android_version(self):
         if self.PORT_ENV_NAME in self.env:
-            cmd = "{a} -s {n} shell getprop ro.build.version.sdk".format(a= self.CLI_TOOL, n=self.env[self.ID_ENV_NAME])
+            cmd = "{a} -s {n} shell getprop ro.build.version.sdk".format(a=self.CLI_TOOL, n=self.env[self.ID_ENV_NAME])
         else:
-            cmd = "{a} shell getprop ro.build.version.sdk".format(a= self.CLI_TOOL)
+            cmd = "{a} shell getprop ro.build.version.sdk".format(a=self.CLI_TOOL)
 
         version_str = os.popen(cmd).read()
         return int(version_str)
