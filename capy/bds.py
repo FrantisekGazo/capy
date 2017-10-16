@@ -219,6 +219,8 @@ class Build(object):
         if not self.app_id:
             exit_error("BDS Build '%s' must specify an 'app_id'" % self.name)
         self.csid = info.get('csid', None)
+        if self.csid is not None:
+            self.csid = self.csid.encode('utf-8')
         if os == OS.iOS and not self.csid:
             exit_error("BDS iOS Build '%s' must specify a 'csid' (Code Sign Identity)" % self.name)
         self.env = info.get('env', None)
