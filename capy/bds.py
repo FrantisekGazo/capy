@@ -59,7 +59,7 @@ class BuildManager(object):
             if build.os == OS.Android:
                 # resign build for Android
                 print Color.BLUE + 'Resigning apk...' + Color.ENDC
-                subprocess.call(['calabash-android', 'resign', download_to])
+                subprocess.call(['bundle', 'exec', 'calabash-android', 'resign', download_to])
         else:
             exit_error('BDS build could not be downloaded')
 
