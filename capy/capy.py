@@ -47,7 +47,7 @@ def check_package(name, current_version):
 
 
 def check_calabash():
-    cmds = ['bundle', 'exec', 'calabash-android', 'cucumber']
+    cmds = ['calabash-android', 'cucumber']
     for cmd in cmds:
         if not check_cmd(cmd):
             exit_error('Command %s was NOT found. Please make sure calabash is installed.' % cmd)
