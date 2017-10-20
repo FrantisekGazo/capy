@@ -108,10 +108,10 @@ class IosDevice(BaseDevice):
         super(IosDevice, self).__init__(OS.iOS, name, env)
 
     def get_console_cmd(self, build):
-        return ['calabash-ios', 'console', '-p', 'ios']
+        return ['bundle', 'exec', 'calabash-ios', 'console', '-p', 'ios']
 
     def get_run_cmd(self, build):
-        return ['cucumber', '-p', 'ios']
+        return ['bundle', 'exec', 'cucumber', '-p', 'ios']
 
     def get_build_env(self, build):
         return {
@@ -164,10 +164,10 @@ class AndroidDevice(BaseDevice):
         super(AndroidDevice, self).__init__(OS.Android, name, env)
 
     def get_console_cmd(self, build):
-        return ['calabash-android', 'console', build.get_path(), '-p', 'android']
+        return ['bundle', 'exec', 'calabash-android', 'console', build.get_path(), '-p', 'android']
 
     def get_run_cmd(self, build):
-        return ['calabash-android', 'run', build.get_path(), '-p', 'android']
+        return ['bundle', 'exec', 'calabash-android', 'run', build.get_path(), '-p', 'android']
 
     def get_cli_tools(self):
         return [self.CLI_TOOL]
@@ -176,7 +176,7 @@ class AndroidDevice(BaseDevice):
         cmds = []
 
         # rebuild test-server
-        cmds.append(['calabash-android', 'build', build.get_path()])
+        cmds.append(['bundle', 'exec', 'calabash-android', 'build', build.get_path()])
 
         # install app
         install_cmd = [self.CLI_TOOL]

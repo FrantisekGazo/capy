@@ -22,5 +22,5 @@ See ![example](example-capy_private.yaml) with comments for more info.
 
 2) Register new project: `python setup.py register`
 
-3) Upload new build: clean `rm -Rf dist`, then create a build `setup.py sdist` and finally upload it `twine upload dist/*`
+3) Upload new build: clean `rm -Rf dist`, then create a build `./setup.py sdist` and finally upload it `twine upload dist/*`
 

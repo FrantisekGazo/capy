@@ -52,12 +52,13 @@ class Config:
     def apply_includes(self, data):
         result = {}
 
-        for key, value in data.iteritems():
-            if self.INCLUDE in value and value[self.INCLUDE] is not None:
-                included_value = self.load_yaml(value[self.INCLUDE], True)
-                result[key] = merge(included_value, value)
-            else:
-                result[key] = value
+        if data is not None:
+            for key, value in data.iteritems():
+                if self.INCLUDE in value and value[self.INCLUDE] is not None:
+                    included_value = self.load_yaml(value[self.INCLUDE], True)
+                    result[key] = merge(included_value, value)
+                else:
+                    result[key] = value
 
         return result
 
