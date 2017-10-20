@@ -65,7 +65,7 @@ class Color:
 
 
 def exit_error(msg):
-    print Color.LIGHT_RED + 'Error: %s' % msg + Color.ENDC
+    print(Color.LIGHT_RED + 'Error: %s' % msg + Color.ENDC)
     sys.exit(1)
 
 

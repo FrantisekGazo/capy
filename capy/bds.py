@@ -11,7 +11,7 @@ from util import Color, TMP_DIR, exit_error, get
 ################################
 # Build Manager
 #
-# cli command: curl -O $(curl -u 'token':'' -s http://inloop-bds.test.inloop.eu/api/v1/customers/medrio/projects/mcapture/applications/ios/environments/internal-calabash/builds/ | python -c 'import sys, json; print json.load(sys.stdin)["builds"][0]["download_url"]')
+# cli command: curl -O $(curl -u 'token':'' -s http://inloop-bds.test.inloop.eu/api/v1/customers/medrio/projects/mcapture/applications/ios/environments/internal-calabash/builds/ | python -c 'import sys, json; print(json.load(sys.stdin)["builds"][0]["download_url"]'))
 #
 ################################
 class BuildManager(object):
@@ -39,12 +39,12 @@ class BuildManager(object):
         # load build from BDS
         bds_build = self._get_latest_bds_build(build)
         download_url = bds_build['download_url']
-        print Color.BLUE + 'Downloading from url %s...' % download_url + Color.ENDC
+        print(Color.BLUE + 'Downloading from url %s...' % download_url + Color.ENDC)
         # download
         download_to = build.get_path()
 
         if path.exists(download_to):
-            print Color.BLUE + 'Removing previous %s...' % download_to + Color.ENDC
+            print(Color.BLUE + 'Removing previous %s...' % download_to + Color.ENDC)
             subprocess.call(['rm', download_to])
 
         # execute download
@@ -55,10 +55,10 @@ class BuildManager(object):
         download_proc.communicate()
 
         if path.exists(download_to):
-            print Color.BLUE + 'Downloaded to ' + download_to + Color.ENDC
+            print(Color.BLUE + 'Downloaded to ' + download_to + Color.ENDC)
             if build.os == OS.Android:
                 # resign build for Android
-                print Color.BLUE + 'Resigning apk...' + Color.ENDC
+                print(Color.BLUE + 'Resigning apk...' + Color.ENDC)
                 subprocess.call(['bundle', 'exec', 'calabash-android', 'resign', download_to])
         else:
             exit_error('BDS build could not be downloaded')

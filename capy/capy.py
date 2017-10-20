@@ -22,11 +22,11 @@ def check_version():
     msg = check_package(NAME, VERSION)
     if msg:
         c = Color.LIGHT_GREEN
-        print c + '+----------------------------------------+'
-        print c + '| {m:30}'.format(m=msg) + c + ' |'
-        print c + '| {m:38}'.format(m=' ') + c + ' |'
-        print c + '| {m:42}'.format(m='Please run: ' + Color.ENDC + 'pip install -U ' + NAME) + c + ' |'
-        print c + '+----------------------------------------+' + Color.ENDC
+        print(c + '+----------------------------------------+')
+        print(c + '| {m:30}'.format(m=msg) + c + ' |')
+        print(c + '| {m:38}'.format(m=' ') + c + ' |')
+        print(c + '| {m:42}'.format(m='Please run: ' + Color.ENDC + 'pip install -U ' + NAME) + c + ' |')
+        print(c + '+----------------------------------------+' + Color.ENDC)
 
 
 def check_package(name, current_version):
@@ -65,8 +65,8 @@ def read_build(args):
 
 
 def version():
-    print '%s %s' % (NAME, VERSION)
-    print DESCRIPTION
+    print('%s %s' % (NAME, VERSION))
+    print(DESCRIPTION)
 
 
 def console(build_name, device_name):
@@ -75,7 +75,7 @@ def console(build_name, device_name):
     config = get_config()
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
-    print Color.GREEN + "Opening console for device '%s' with '%s'..." % (device.name, build.name) + Color.ENDC
+    print(Color.GREEN + "Opening console for device '%s' with '%s'..." % (device.name, build.name) + Color.ENDC)
     DeviceRunner(device).open_console(build)
 
 
@@ -106,7 +106,7 @@ def run(build_name, device_name, test_name, with_report=False):
     build = config.build_manager.check_and_get_build(device.os, build_name)
     version_names_getter = lambda: config.build_manager.get_version_names(build)
 
-    print Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC
+    print(Color.GREEN + "Running '%s' on device '%s' with '%s'..." % (test.name, device.name, build.name) + Color.ENDC)
     runner = DeviceRunner(device)
     runner.run_test(test, build, version_names_getter, report=with_report)
 
@@ -117,9 +117,9 @@ def run(build_name, device_name, test_name, with_report=False):
     # show time
     end_time = datetime.now().replace(microsecond=0)
     diff = end_time - start_time
-    print '+-------------------------------------------------------------------------'
-    print '| Total testing time is: ', diff
-    print '+-------------------------------------------------------------------------'
+    print('+-------------------------------------------------------------------------')
+    print('| Total testing time is: ', diff)
+    print('+-------------------------------------------------------------------------')
 
     if with_report and runner.latest_report_dir:
         # move logs
@@ -130,7 +130,7 @@ def run(build_name, device_name, test_name, with_report=False):
 
 
 def exec_action(test_action, config, build, device):
-    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (test_action, device.name, build.name) + Color.ENDC
+    print(Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (test_action, device.name, build.name) + Color.ENDC)
     if test_action == TestAction.DOWNLOAD:
         config.build_manager.download(build)
     elif test_action == TestAction.INSTALL:
@@ -144,27 +144,27 @@ def list(builds=False, devices=False, tests=False):
 
     line_start = Color.GREEN
 
-    print line_start + '+------------------------------------------------------------------------------------' + Color.ENDC
+    print(line_start + '+------------------------------------------------------------------------------------' + Color.ENDC)
     if builds:
-        print line_start + '| ' + Color.LIGHT_YELLOW + 'BUILDS:'
-        print line_start + '|'
+        print(line_start + '| ' + Color.LIGHT_YELLOW + 'BUILDS:')
+        print(line_start + '|')
         for os, builds_dict in config.build_manager.builds.iteritems():
-            print line_start + '| ' + os
+            print(line_start + '| ' + os)
             for name, build in sorted(builds_dict.iteritems()):
-                print build.show(line_start + '|    ')
-        print line_start + '|------------------------------------------------------------------------------------' + Color.ENDC
+                print(build.show(line_start + '|    '))
+        print(line_start + '|------------------------------------------------------------------------------------' + Color.ENDC)
     if devices:
-        print line_start + '| ' + Color.LIGHT_YELLOW + 'DEVICES:'
-        print line_start + '|'
+        print(line_start + '| ' + Color.LIGHT_YELLOW + 'DEVICES:')
+        print(line_start + '|')
         for name, device in sorted(config.device_manager.devices.iteritems()):
-            print device.show(line_start + '| ')
-        print line_start + '|------------------------------------------------------------------------------------' + Color.ENDC
+            print(device.show(line_start + '| '))
+        print(line_start + '|------------------------------------------------------------------------------------' + Color.ENDC)
     if tests:
-        print line_start + '| ' + Color.LIGHT_YELLOW + 'TESTS:'
-        print line_start + '|'
+        print(line_start + '| ' + Color.LIGHT_YELLOW + 'TESTS:')
+        print(line_start + '|')
         for name, test in sorted(config.test_manager.tests.iteritems()):
-            print test.show(line_start + '| ')
-        print line_start + '+------------------------------------------------------------------------------------' + Color.ENDC
+            print(test.show(line_start + '| '))
+        print(line_start + '+------------------------------------------------------------------------------------' + Color.ENDC)
 
 
 def download(build_name, os):
@@ -172,7 +172,7 @@ def download(build_name, os):
 
     config = get_config()
     build = config.build_manager.get_build(os, build_name)
-    print Color.GREEN + "Downloading build '%s' for '%s'..." % (build.name, build.os) + Color.ENDC
+    print(Color.GREEN + "Downloading build '%s' for '%s'..." % (build.name, build.os) + Color.ENDC)
     config.build_manager.download(build)
 
 
@@ -182,7 +182,7 @@ def install(build_name, device_name):
     config = get_config()
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
-    print Color.GREEN + "Installing '%s' to device '%s'..." % (build.name, device.name) + Color.ENDC
+    print(Color.GREEN + "Installing '%s' to device '%s'..." % (build.name, device.name) + Color.ENDC)
     DeviceRunner(device).install(build)
 
 
@@ -192,7 +192,7 @@ def uninstall(build_name, device_name):
     config = get_config()
     device = config.device_manager.get_device(device_name)
     build = config.build_manager.check_and_get_build(device.os, build_name)
-    print Color.GREEN + "Uninstalling '%s' from device '%s'..." % (build.name, device.name) + Color.ENDC
+    print(Color.GREEN + "Uninstalling '%s' from device '%s'..." % (build.name, device.name) + Color.ENDC)
     DeviceRunner(device).uninstall(build)
 
 

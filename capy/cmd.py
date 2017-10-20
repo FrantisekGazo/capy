@@ -86,14 +86,14 @@ class DeviceRunner(object):
         )
 
         # show commands
-        print '--------------------------------------------------------------------------'
-        print '| Commands: '
-        print '|'
-        print '|', ' '.join(cmd)
-        print '|'
-        print '| NOTE: output files will be moved to:', real_out
-        print '|'
-        print '--------------------------------------------------------------------------'
+        print('--------------------------------------------------------------------------')
+        print('| Commands: ')
+        print('|')
+        print('|', ' '.join(cmd))
+        print('|')
+        print('| NOTE: output files will be moved to:', real_out)
+        print('|')
+        print('--------------------------------------------------------------------------')
 
         # run command
         self.call(cmd, env)

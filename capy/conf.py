@@ -26,7 +26,7 @@ class Config:
     def load_yaml(self, file_name, check):
         if not path.exists(file_name):
             if check:
-                print "Current directory does not contain configuration file '%s'. Please create one and run again." % file_name
+                print("Current directory does not contain configuration file '%s'. Please create one and run again." % file_name)
                 sys.exit(1)
             else:
                 return None
