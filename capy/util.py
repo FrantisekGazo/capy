@@ -65,11 +65,7 @@ class Color:
     WHITE = '\033[97m'
 
 
-def exit_error(msg):
-    raise CapyException(msg)
-
-
-def print_exit_error(msg):
+def print_error(msg):
     print Color.LIGHT_RED + 'Error: %s' % msg + Color.ENDC
 
 

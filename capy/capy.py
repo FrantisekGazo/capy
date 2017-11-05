@@ -5,7 +5,7 @@ import argparse
 import xmlrpclib
 from datetime import datetime
 from conf import Config
-from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, print_exit_error
+from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, print_error
 from test import TestAction
 from cmd import DeviceRunner
 from error import CapyException
@@ -231,7 +231,7 @@ def main():
     try:
         run(parser, args)
     except CapyException as ex:
-        print_exit_error(ex.message)
+        print_error(ex.message)
         sys.exit(1)
 
 

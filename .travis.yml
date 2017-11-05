@@ -7,10 +7,6 @@ branches:
     - /^feature\/.*$/
     - /^hotfix\/.*$/
 
-os:
-  - linux
-  - osx
-
 python:
   - 2.7
 
