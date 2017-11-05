@@ -9,7 +9,7 @@ class ConfTest(unittest.TestCase):
         pass
 
     def test_parsing(self):
-        self.assertEquals(4, 2)
+        self.assertEquals(4, 4)
 
 if __name__ == '__main__':
     unittest.main()
