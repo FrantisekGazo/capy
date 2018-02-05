@@ -5,9 +5,10 @@ import argparse
 import xmlrpclib
 from datetime import datetime
 from conf import Config
-from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, exit_error
+from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, print_error
 from test import TestAction
 from cmd import DeviceRunner
+from error import CapyException
 
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
@@ -130,7 +131,8 @@ def run(build_name, device_name, test_name, with_report=False):
 
 
 def exec_action(test_action, config, build, device):
-    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (test_action, device.name, build.name) + Color.ENDC
+    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (
+    test_action, device.name, build.name) + Color.ENDC
     if test_action == TestAction.DOWNLOAD:
         config.build_manager.download(build)
     elif test_action == TestAction.INSTALL:
@@ -226,7 +228,14 @@ def main():
     parser.add_argument('-u', '--uninstall', nargs=1, metavar='D',
                         help="Uninstall build from device D")
     args = parser.parse_args()
+    try:
+        run(parser, args)
+    except CapyException as ex:
+        print_error(ex.message)
+        sys.exit(1)
 
+
+def run(parser, args):
     # run
     if args.run:
         run(build_name=read_build(args), device_name=args.run[0], test_name=args.run[1])

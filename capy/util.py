@@ -5,6 +5,7 @@ import sys
 import subprocess
 import shutil
 from os import makedirs, path, rename
+from error import CapyException
 
 ####################################################################################################
 # Temporary directory for all files
@@ -64,9 +65,8 @@ class Color:
     WHITE = '\033[97m'
 
 
-def exit_error(msg):
+def print_error(msg):
     print Color.LIGHT_RED + 'Error: %s' % msg + Color.ENDC
-    sys.exit(1)
 
 
 ####################################################################################################

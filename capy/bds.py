@@ -5,7 +5,8 @@ from os import path, makedirs
 import subprocess
 import json
 from device_os import OS
-from util import Color, TMP_DIR, exit_error, get
+from util import Color, TMP_DIR, get
+from error import CapyException
 
 
 ################################
@@ -19,7 +20,7 @@ class BuildManager(object):
 
     def __init__(self, conf, os_list):
         if not conf:
-            exit_error('BDS configuration is missing')
+            raise CapyException('BDS configuration is missing')
 
         conf['build_dir'] = conf.get('build_dir', path.join(TMP_DIR + 'builds/'))
         self.token = get(conf, 'token', None)  # don't check token until it's needed
@@ -32,7 +33,7 @@ class BuildManager(object):
 
     def get_token(self):
         if not self.token:
-            exit_error("BDS configuration is missing a 'token'")
+            raise CapyException("BDS configuration is missing a 'token'")
         return self.token
 
     def download(self, build):
@@ -61,7 +62,7 @@ class BuildManager(object):
                 print Color.BLUE + 'Resigning apk...' + Color.ENDC
                 subprocess.call(['bundle', 'exec', 'calabash-android', 'resign', download_to])
         else:
-            exit_error('BDS build could not be downloaded')
+            raise CapyException('BDS build could not be downloaded')
 
     def check_and_get_build(self, os, build_name):
         build = self.get_build(os, build_name)
@@ -81,14 +82,14 @@ class BuildManager(object):
         if build:
             return build
         else:
-            exit_error("Build with name '%s' does not exists for '%s'!" % (build_name, os))
+            raise CapyException("Build with name '%s' does not exists for '%s'!" % (build_name, os))
 
     def get_builds(self, os):
         builds = self.builds.get(os, None)
         if builds:
             return builds
         else:
-            exit_error("No %s builds were found!" % os)
+            raise CapyException("No %s builds were found!" % os)
 
     def get_version_names(self, build):
         url = self._prepare_url(
@@ -112,12 +113,12 @@ class BuildManager(object):
             if build.is_default:
                 return build
 
-        exit_error("'%s' has no default build! Please add 'default: true' to one of the builds." % os)
+        raise CapyException("'%s' has no default build! Please add 'default: true' to one of the builds." % os)
 
     def _load(self, conf, prop):
         p = conf.get(prop, None)
         if not p:
-            exit_error("BDS configuration is missing a '%s'" % prop)
+            raise CapyException("BDS configuration is missing a '%s'" % prop)
         return p
 
     def _load_builds(self, conf, os):
@@ -130,7 +131,7 @@ class BuildManager(object):
         default_build_found = False
         default_build_name = get(os_conf, 'default', None)
         if not default_build_name:
-            exit_error("BDS is missing default build for '%s'" % os)
+            raise CapyException("BDS is missing default build for '%s'" % os)
 
         for name, info in os_conf.iteritems():
             if name == 'default':
@@ -146,7 +147,7 @@ class BuildManager(object):
             builds[name] = build
 
         if not default_build_found:
-            exit_error("'%s' default build '%s' was not found" % (os, default_build_name))
+            raise CapyException("'%s' default build '%s' was not found" % (os, default_build_name))
 
         self.builds[os] = builds
 
@@ -156,7 +157,7 @@ class BuildManager(object):
 
         versions = self.get_version_names(build)
         if build.version not in versions:
-            exit_error("'{os}' build '{name}' has invalid version name '{version}'.\nSupported versions are {versions}".format(
+            raise CapyException("'{os}' build '{name}' has invalid version name '{version}'.\nSupported versions are {versions}".format(
                 os=build.os, name=build.name, version=build.version, versions=versions
             ))
 
@@ -173,7 +174,7 @@ class BuildManager(object):
             response = self._download_json(url)
             return response['builds'][0]  # get 1st build
         except:
-            exit_error('No BDS build was found')
+            raise CapyException('No BDS build was found')
 
     def _download_json(self, url):
         token = "%s:\'\'" % self.get_token()
@@ -185,12 +186,12 @@ class BuildManager(object):
         response = proc.communicate()[0]
 
         if response == 'Unauthorized':
-            exit_error('Unauthorized - Your BDS token expired!')
+            raise CapyException('Unauthorized - Your BDS token expired!')
 
         try:
             return json.loads(response)
         except:
-            exit_error('JSON could not be downloaded from ' + url)
+            raise CapyException('JSON could not be downloaded from ' + url)
 
     def _prepare_url(self, os, env=None, conf=None, version=None, end=None):
         # mandatory url parts:
@@ -217,12 +218,12 @@ class Build(object):
         self.is_default = False
         self.app_id = info.get('app_id', None)
         if not self.app_id:
-            exit_error("BDS Build '%s' must specify an 'app_id'" % self.name)
+            raise CapyException("BDS Build '%s' must specify an 'app_id'" % self.name)
         self.csid = info.get('csid', None)
         if self.csid is not None:
             self.csid = self.csid.encode('utf-8')
         if os == OS.iOS and not self.csid:
-            exit_error("BDS iOS Build '%s' must specify a 'csid' (Code Sign Identity)" % self.name)
+            raise CapyException("BDS iOS Build '%s' must specify a 'csid' (Code Sign Identity)" % self.name)
         self.env = info.get('env', None)
         self.conf = info.get('conf', None)
         self.version = info.get('version', None)
