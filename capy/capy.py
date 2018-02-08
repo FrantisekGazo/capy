@@ -13,7 +13,7 @@ from error import CapyException
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.1.4'
+VERSION = '1.1.6'
 
 
 ####################################################################################################
@@ -51,7 +51,7 @@ def check_calabash():
     cmds = ['calabash-android', 'cucumber']
     for cmd in cmds:
         if not check_cmd(cmd):
-            exit_error('Command %s was NOT found. Please make sure calabash is installed.' % cmd)
+            raise CapyException('Command %s was NOT found. Please make sure calabash is installed.' % cmd)
 
 
 ####################################################################################################
