@@ -13,7 +13,7 @@ from error import CapyException
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.1.7'
+VERSION = '1.1.8'
 
 
 ####################################################################################################
@@ -229,13 +229,13 @@ def main():
                         help="Uninstall build from device D")
     args = parser.parse_args()
     try:
-        run(parser, args)
+        main_run(parser, args)
     except CapyException as ex:
         print_error(ex.message)
         sys.exit(1)
 
 
-def run(parser, args):
+def main_run(parser, args):
     # run
     if args.run:
         run(build_name=read_build(args), device_name=args.run[0], test_name=args.run[1])
