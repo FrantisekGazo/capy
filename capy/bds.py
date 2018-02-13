@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import sys
+import os
+import time
 from os import path, makedirs
 import subprocess
 import json
@@ -50,7 +52,7 @@ class BuildManager(object):
 
         # execute download
         download_proc = subprocess.Popen(
-                ['curl', '-o', download_to, download_url], stdout=sys.stdout, stderr=sys.stderr
+            ['curl', '-o', download_to, download_url], stdout=sys.stdout, stderr=sys.stderr
         )
         download_proc.wait()
         download_proc.communicate()
@@ -181,15 +183,26 @@ class BuildManager(object):
         cmd = ['curl', '-u', token, '-s', url]
         c = ' '.join(cmd)
 
-        proc = subprocess.Popen(c, shell=True, stdout=subprocess.PIPE)
-        proc.wait()
-        response = proc.communicate()[0]
-
-        if response == 'Unauthorized':
-            raise CapyException('Unauthorized - Your BDS token expired!')
+        temp_file_path = 'temp_download_%s.json' % time.time()
 
         try:
-            return json.loads(response)
+            # write cmd output to a temporary file (because when piping to the main process the subprocess hangs)
+            with open(temp_file_path, 'w+') as temp_file:
+                proc = subprocess.Popen(c, shell=True, stdout=temp_file)
+            proc.wait()
+
+            # read response json
+            with open(temp_file_path, 'r') as temp_file:
+                response_json = json.load(temp_file)
+
+            # check if we have a response
+            if response_json is None:
+                raise CapyException('Unauthorized - Your BDS token expired!')
+
+            # clear temp file
+            os.remove(temp_file_path)
+
+            return response_json
         except:
             raise CapyException('JSON could not be downloaded from ' + url)
 
