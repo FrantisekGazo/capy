@@ -2,7 +2,7 @@
 
 import sys
 import argparse
-import xmlrpclib
+import urllib, json
 from datetime import datetime
 from conf import Config
 from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, print_error
@@ -13,7 +13,7 @@ from error import CapyException
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.1.8'
+VERSION = '1.1.9'
 
 
 ####################################################################################################
@@ -31,20 +31,16 @@ def check_version():
 
 
 def check_package(name, current_version):
-    pypi = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
-    available = pypi.package_releases(name)
-    if not available:
-        # Try to capitalize pkg name
-        available = pypi.package_releases(name.capitalize())
-
-    msg = name
-    if not available:
-        msg = None
-    elif available[0] != current_version:
-        msg += ' has new release (%s) available' % available[0]
-    else:
-        msg = None
-    return msg
+    try:
+        response = urllib.urlopen('http://pypi.python.org/pypi/%s/json' % name)
+        data = json.loads(response.read())
+        latest_version = data['info']['version']
+        if latest_version != current_version:
+            return '%s has new release (%s) available' % (name, latest_version)
+        else:
+            return None
+    except IOError:
+        return None  # show nothing if request failed
 
 
 def check_calabash():
