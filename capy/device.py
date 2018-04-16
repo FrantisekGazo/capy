@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from util import Color, exit_error, get
+from util import Color, get
+from error import CapyException
 from device_os import OS
 import os
 
@@ -24,7 +25,7 @@ class DeviceManager(object):
                 id = get(info, 'id', None)
                 port = get(info, 'port', None)
                 if id and not port:
-                    exit_error("Device '%s' is missing parameter 'port' (it is required if 'id' is specified)" % name)
+                    raise CapyException("Device '%s' is missing parameter 'port' (it is required if 'id' is specified)" % name)
 
                 self.devices[name] = AndroidDevice(name, id, port)
             elif os == OS.iOS:
@@ -41,7 +42,7 @@ class DeviceManager(object):
     # private
     def validate_device(self, name, params, param_name):
         if param_name not in params.keys():
-            exit_error("Device '%s' is missing parameter '%s'" % (name, param_name))
+            raise CapyException("Device '%s' is missing parameter '%s'" % (name, param_name))
 
     # public
     def get_device(self, name):
@@ -49,7 +50,7 @@ class DeviceManager(object):
         if device:
             return device
         else:
-            exit_error("Device '%s' was not found" % name)
+            raise CapyException("Device '%s' was not found" % name)
 
 
 ################################

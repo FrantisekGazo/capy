@@ -2,17 +2,18 @@
 
 import sys
 import argparse
-import xmlrpclib
+import urllib, json
 from datetime import datetime
 from conf import Config
-from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, exit_error
+from util import Color, STDERR_LOGGER, STDOUT_LOGGER, check_cmd, print_error
 from test import TestAction
 from cmd import DeviceRunner
+from error import CapyException
 
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.1.4'
+VERSION = '1.1.9'
 
 
 ####################################################################################################
@@ -30,27 +31,23 @@ def check_version():
 
 
 def check_package(name, current_version):
-    pypi = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
-    available = pypi.package_releases(name)
-    if not available:
-        # Try to capitalize pkg name
-        available = pypi.package_releases(name.capitalize())
-
-    msg = name
-    if not available:
-        msg = None
-    elif available[0] != current_version:
-        msg += ' has new release (%s) available' % available[0]
-    else:
-        msg = None
-    return msg
+    try:
+        response = urllib.urlopen('http://pypi.python.org/pypi/%s/json' % name)
+        data = json.loads(response.read())
+        latest_version = data['info']['version']
+        if latest_version != current_version:
+            return '%s has new release (%s) available' % (name, latest_version)
+        else:
+            return None
+    except IOError:
+        return None  # show nothing if request failed
 
 
 def check_calabash():
     cmds = ['calabash-android', 'cucumber']
     for cmd in cmds:
         if not check_cmd(cmd):
-            exit_error('Command %s was NOT found. Please make sure calabash is installed.' % cmd)
+            raise CapyException('Command %s was NOT found. Please make sure calabash is installed.' % cmd)
 
 
 ####################################################################################################
@@ -130,7 +127,8 @@ def run(build_name, device_name, test_name, with_report=False):
 
 
 def exec_action(test_action, config, build, device):
-    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (test_action, device.name, build.name) + Color.ENDC
+    print Color.GREEN + "Running action '%s' on device '%s' with '%s'..." % (
+    test_action, device.name, build.name) + Color.ENDC
     if test_action == TestAction.DOWNLOAD:
         config.build_manager.download(build)
     elif test_action == TestAction.INSTALL:
@@ -226,7 +224,14 @@ def main():
     parser.add_argument('-u', '--uninstall', nargs=1, metavar='D',
                         help="Uninstall build from device D")
     args = parser.parse_args()
+    try:
+        main_run(parser, args)
+    except CapyException as ex:
+        print_error(ex.message)
+        sys.exit(1)
 
+
+def main_run(parser, args):
     # run
     if args.run:
         run(build_name=read_build(args), device_name=args.run[0], test_name=args.run[1])

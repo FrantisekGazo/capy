@@ -2,7 +2,8 @@
 
 import sys
 from os import path
-from util import Color, get, merge, TMP_DIR, exit_error
+from util import Color, get, merge, TMP_DIR
+from error import CapyException
 
 
 ################################
@@ -39,7 +40,7 @@ class TestManager(object):
         if test:
             return test
         else:
-            exit_error("Test '%s' was not found" % name)
+            raise CapyException("Test '%s' was not found" % name)
 
 
 ################################################################
@@ -57,7 +58,7 @@ class Test:
 
         self.run = get(conf, 'run', None)
         if not self.run:
-            exit_error("Test '%s' is missing a 'run: ...'" % name)
+            raise CapyException("Test '%s' is missing a 'run: ...'" % name)
 
         self.before = get(conf, 'before', [])
         TestAction.validate(self.before)
@@ -102,4 +103,4 @@ class TestAction:
     def validate(cls, actions):
         for action in actions:
             if action not in cls.ALL:
-                exit_error("Test action '%s' is not supported" % action)
+                raise CapyException("Test action '%s' is not supported" % action)
