@@ -13,7 +13,7 @@ from error import CapyException
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.1.10'
+VERSION = '1.1.11'
 
 
 ####################################################################################################
@@ -32,7 +32,7 @@ def check_version():
 
 def check_package(name, current_version):
     try:
-        response = urllib.urlopen('http://pypi.python.org/pypi/%s/json' % name)
+        response = urllib.urlopen('https://pypi.python.org/pypi/%s/json' % name)
         data = json.loads(response.read())
         latest_version = data['info']['version']
         if latest_version != current_version:
