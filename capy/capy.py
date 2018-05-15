@@ -13,7 +13,7 @@ from error import CapyException
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.1.9'
+VERSION = '1.1.10'
 
 
 ####################################################################################################

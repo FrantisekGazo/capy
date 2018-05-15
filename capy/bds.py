@@ -204,6 +204,10 @@ class BuildManager(object):
 
             return response_json
         except:
+            # clear temp file
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
             raise CapyException('JSON could not be downloaded from ' + url)
 
     def _prepare_url(self, os, env=None, conf=None, version=None, end=None):
