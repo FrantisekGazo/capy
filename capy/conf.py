@@ -30,13 +30,23 @@ class Config:
             else:
                 return None
 
-        if not path.exists(file_name):
+        # support both .yaml and .yml
+        file_yaml = "%s.yaml" % file_name
+        file_yml = "%s.yml" % file_name
+        found_file = None
+
+        if path.exists(file_yaml):
+            found_file = file_yaml
+        elif path.exists(file_yml):
+            found_file = file_yml
+
+        if found_file is None:
             if check:
-                raise CapyException("Current directory does not contain configuration file '%s'. Please create one and run again." % file_name)
+                raise CapyException("Current directory does not contain configuration file '%s'. Please create one and run again." % file_yaml)
             else:
                 return None
 
-        with open(file_name, 'r') as stream:
+        with open(found_file, 'r') as stream:
             try:
                 return yaml.load(stream)
             except yaml.YAMLError as ex:
@@ -48,11 +58,11 @@ class Config:
         private_data = self.load_yaml(private_file_name, check=False)
         private_data = self.apply_includes(private_data)
 
-        if private_data:
+        if private_data is not None:
             private_data = merge(private_data, data)
             return private_data
         else:
-            log.verbose("Private config file '%s' not found." % private_file_name)
+            log.verbose("Private config file '%s.yaml' not found." % private_file_name)
             return data
 
     def apply_includes(self, data):

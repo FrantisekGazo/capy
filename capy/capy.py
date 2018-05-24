@@ -54,7 +54,7 @@ def check_calabash():
 # Helper methods
 ####################################################################################################
 def get_config():
-    return Config(file_name='capy_conf.yaml', private_file_name='capy_private.yaml')
+    return Config(file_name='capy_conf', private_file_name='capy_private')
 
 
 def read_build(args):
