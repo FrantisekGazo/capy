@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 from os import path
-import sys
 import yaml
-from util import merge, get
+from util import merge, get, log
 from device import DeviceManager
 from device_os import OS
 from test import TestManager
@@ -53,6 +52,7 @@ class Config:
             private_data = merge(private_data, data)
             return private_data
         else:
+            log.verbose("Private config file '%s' not found." % private_file_name)
             return data
 
     def apply_includes(self, data):

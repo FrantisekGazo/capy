@@ -39,8 +39,8 @@ class ConfTest(unittest.TestCase):
     def __write(self, tmp_file, lines):
         with open(tmp_file.name, 'w') as file:
             content = '\n'.join(lines)
-            #print content
             file.write(content)
+
 
 if __name__ == '__main__':
     unittest.main()

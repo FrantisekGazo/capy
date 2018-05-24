@@ -1,7 +1,7 @@
 from os import environ, makedirs, path
 import subprocess
 import time
-from util import merge, TMP_DIR, STDERR_LOGGER, STDOUT_LOGGER, check_cmd
+from util import merge, TMP_DIR, STDERR_LOG_MANAGER, STDOUT_LOG_MANAGER, check_cmd, log
 import shutil
 
 
@@ -19,11 +19,11 @@ class DeviceRunner(object):
 
     # cmd is a string array
     def call(self, cmd, env=None):
-        if STDOUT_LOGGER.is_used:
+        if STDOUT_LOG_MANAGER.is_used:
             # if custom logger is used, use it too
             main_proc = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            tee_proc = subprocess.Popen(['tee', '-a', STDOUT_LOGGER.file_path], stdin=main_proc.stdout,
-                                        stdout=STDOUT_LOGGER, stderr=STDERR_LOGGER)
+            tee_proc = subprocess.Popen(['tee', '-a', STDOUT_LOG_MANAGER.file_path], stdin=main_proc.stdout,
+                                        stdout=STDOUT_LOG_MANAGER, stderr=STDERR_LOG_MANAGER)
             tee_proc.wait()
             tee_proc.communicate()
         else:
@@ -86,14 +86,14 @@ class DeviceRunner(object):
         )
 
         # show commands
-        print '--------------------------------------------------------------------------'
-        print '| Commands: '
-        print '|'
-        print '|', ' '.join(cmd)
-        print '|'
-        print '| NOTE: output files will be moved to:', real_out
-        print '|'
-        print '--------------------------------------------------------------------------'
+        log.raw('--------------------------------------------------------------------------')
+        log.raw('| Commands: ')
+        log.raw('|')
+        log.raw('| ' + ' '.join(cmd))
+        log.raw('|')
+        log.raw('| NOTE: output files will be moved to: ' + real_out)
+        log.raw('|')
+        log.raw('--------------------------------------------------------------------------')
 
         # run command
         self.call(cmd, env)

@@ -65,14 +65,42 @@ class Color:
     WHITE = '\033[97m'
 
 
-def print_error(msg):
-    print Color.LIGHT_RED + 'Error: %s' % msg + Color.ENDC
+####################################################################################################
+# Logs console messages
+####################################################################################################
+class PrintLog(object):
+    def __init__(self):
+        self.verbose = self._verbose_noop
+
+    def error(self, msg):
+        print Color.LIGHT_RED + 'Error: %s' % msg + Color.ENDC
+
+    def warning(self, msg):
+        print Color.LIGHT_YELLOW + 'Warning: %s' % msg + Color.ENDC
+
+    def raw(self, msg):
+        print msg
+
+    def _verbose_real(self, msg):
+        print Color.LIGHT_CYAN + 'Info: %s' % msg + Color.ENDC
+
+    def _verbose_noop(self, msg):
+        pass
+
+    def setup_verbosity(self, verbose=False):
+        if verbose:
+            self.verbose = self._verbose_real
+        else:
+            self.verbose = self._verbose_noop
+
+
+log = PrintLog()
 
 
 ####################################################################################################
 # Custom logger
 ####################################################################################################
-class Logger(object):
+class LogOutputManager(object):
     def __init__(self, base_file_name, pipe=None):
         if not path.exists(TMP_DIR):
             makedirs(TMP_DIR)
@@ -115,8 +143,8 @@ class Logger(object):
         rename(path.join(dst, self.file_name), path.join(dst, self.base_file_name))
 
 
-STDOUT_LOGGER = Logger('stdout.log', sys.stdout)
-STDERR_LOGGER = Logger('stderr.log', sys.stderr)
+STDOUT_LOG_MANAGER = LogOutputManager('stdout.log', sys.stdout)
+STDERR_LOG_MANAGER = LogOutputManager('stderr.log', sys.stderr)
 
 
 ####################################################################################################
