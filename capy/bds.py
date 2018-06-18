@@ -7,7 +7,7 @@ from os import path, makedirs
 import subprocess
 import json
 from device_os import OS
-from util import Color, TMP_DIR, get
+from util import Color, TMP_DIR, get, log
 from error import CapyException
 
 
@@ -42,12 +42,12 @@ class BuildManager(object):
         # load build from BDS
         bds_build = self._get_latest_bds_build(build)
         download_url = bds_build['download_url']
-        print Color.BLUE + 'Downloading from url %s...' % download_url + Color.ENDC
+        log.raw(Color.BLUE + 'Downloading from url %s...' % download_url + Color.ENDC)
         # download
         download_to = build.get_path()
 
         if path.exists(download_to):
-            print Color.BLUE + 'Removing previous %s...' % download_to + Color.ENDC
+            log.raw(Color.BLUE + 'Removing previous %s...' % download_to + Color.ENDC)
             subprocess.call(['rm', download_to])
 
         # execute download
@@ -58,10 +58,10 @@ class BuildManager(object):
         download_proc.communicate()
 
         if path.exists(download_to):
-            print Color.BLUE + 'Downloaded to ' + download_to + Color.ENDC
+            log.raw(Color.BLUE + 'Downloaded to ' + download_to + Color.ENDC)
             if build.os == OS.Android:
                 # resign build for Android
-                print Color.BLUE + 'Resigning apk...' + Color.ENDC
+                log.raw(Color.BLUE + 'Resigning apk...' + Color.ENDC)
                 subprocess.call(['bundle', 'exec', 'calabash-android', 'resign', download_to])
         else:
             raise CapyException('BDS build could not be downloaded')
