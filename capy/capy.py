@@ -13,7 +13,7 @@ from error import CapyException
 DESCRIPTION = '''CAPY is a helper for running calabash tests on iOS and Android'''
 LONG_DESCRIPTION = DESCRIPTION
 NAME = 'capy'
-VERSION = '1.1.11'
+VERSION = '1.1.13'
 
 
 ####################################################################################################
@@ -115,7 +115,7 @@ def run(build_name, device_name, test_name, with_report=False):
     end_time = datetime.now().replace(microsecond=0)
     diff = end_time - start_time
     log.raw('+-------------------------------------------------------------------------')
-    log.raw('| Total testing time is: ' + diff)
+    log.raw('| Total testing time is: ' + str(diff))
     log.raw('+-------------------------------------------------------------------------')
 
     if with_report and runner.latest_report_dir:
