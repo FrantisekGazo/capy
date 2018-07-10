@@ -30,15 +30,17 @@ class Config:
             else:
                 return None
 
-        # support both .yaml and .yml
-        file_yaml = "%s.yaml" % file_name
-        file_yml = "%s.yml" % file_name
+        # support .yaml, .yml and no extension
+        yaml_file_alternatives = [
+            file_name,
+            file_name + ".yaml",
+            file_name + ".yml",
+        ]
         found_file = None
 
-        if path.exists(file_yaml):
-            found_file = file_yaml
-        elif path.exists(file_yml):
-            found_file = file_yml
+        for yaml_file_alternative in yaml_file_alternatives:
+            if path.exists(yaml_file_alternative):
+                found_file = yaml_file_alternative
 
         if found_file is None:
             if check:
@@ -74,7 +76,8 @@ class Config:
                     raise CapyException("'%s:' is empty. Assign it a value!" % key)
 
                 if self.INCLUDE in value and value[self.INCLUDE] is not None:
-                    included_value = self.load_yaml(value[self.INCLUDE], True)
+                    file_path = value[self.INCLUDE]
+                    included_value = self.load_yaml(file_path, True)
                     result[key] = merge(included_value, value)
                 else:
                     result[key] = value
