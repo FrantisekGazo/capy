@@ -4,6 +4,7 @@
 .DS_Store
 .irb-history
 *.pyc
+venv/
 
 # Android
 
