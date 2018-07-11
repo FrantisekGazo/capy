@@ -23,7 +23,8 @@ class Config:
         self.device_manager = DeviceManager(get(self.data, 'devices', None), OS.all)
         self.test_manager = TestManager(get(self.data, 'tests', None))
 
-    def load_yaml(self, file_name, check):
+    @staticmethod
+    def load_yaml(file_name, check):
         if file_name is None:
             if check:
                 raise CapyException("Missing configuration file.")
@@ -44,7 +45,7 @@ class Config:
 
         if found_file is None:
             if check:
-                raise CapyException("Current directory does not contain configuration file '%s'. Please create one and run again." % file_yaml)
+                raise CapyException("Current directory does not contain configuration file '%s'. Please create one and run again." % file_name)
             else:
                 return None
 

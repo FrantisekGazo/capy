@@ -36,6 +36,11 @@ class ConfTest(unittest.TestCase):
 
             self.assertIsNotNone(config)
 
+    def test_yaml_file_loading(self):
+        with tempfile.NamedTemporaryFile() as temp:
+            config = Config.load_yaml(temp.name, True)
+            self.assertIsNone(config)
+
     def __write(self, tmp_file, lines):
         with open(tmp_file.name, 'w') as file:
             content = '\n'.join(lines)
